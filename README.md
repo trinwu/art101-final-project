@@ -139,19 +139,19 @@ You will be able to make the project public, if you so wish, after the project i
 
 ### By Monday May 20
 
-Please provide by Monday May 20 the details on your project, including the members and the GitHub location of the repository, using [this form](https://docs.google.com/forms/d/e/1FAIpQLSfccd772WcTjhwGVkzYDFi_QpAzl0QYN5UPkei1MlYohyZPTQ/viewform?usp=sf_link).
+Please provide by Monday May 20 the details on your project, including the members and the GitHub location of the repository, using [this form](https://docs.google.com/forms/d/e/1FAIpQLSderx0Rco4qotKG2-1-tZHpKfNU1lQELCdyn7219QwFr1OACg/viewform?usp=sf_link).
 
 ### By Monday June 10
 
 #### Project submission
 
-You should submit the project to [this form](https://docs.google.com/forms/d/e/1FAIpQLSf7gW1ktx-WCcmRa2GdAbRlRdKUFFBeuSm49fwYIUdY_EQOVQ/viewform?usp=sf_link).
+You should submit the project to [this form](https://docs.google.com/forms/d/e/1FAIpQLSfb6Y0sCuNWBsKgr4mkHPT7xLZXlr1WGJVK-9hSskPpIqOyOQ/viewform?usp=sf_link).
 The project should be submitted as a zip file containing the project directory; please verify that the zip enables someone to run the project without any additional information. 
 A `zipit.py` program will be provided here shortly for zipping the project. 
 
 #### Peer evaluation
 
-You should also fill a [peer evaluation](https://docs.google.com/forms/d/e/1FAIpQLScKLnBd6ZR26_3vOtY-E33_PJYmfgExD0-C8RfRxFr5FBuK0g/viewform?usp=sf_link). 
+You should also fill a [peer evaluation](https://docs.google.com/forms/d/e/1FAIpQLScZ7Ux-SsqclZkBblviTJuxXvIKC0rCvqO6TkjYYxj83xay1g/viewform?usp=sf_link). 
 
 ## Project grading
 
