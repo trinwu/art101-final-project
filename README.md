@@ -133,7 +133,7 @@ and similarly for the other tables.
 You should create a ***private*** repository on GitHub, and add as collaborators: 
 - `lucadealfaro`
 - `Fallenhh`
-- `Pratik-Doshi-99`
+- `mathewNJoseph`
 
 You will be able to make the project public, if you so wish, after the project is graded.
 
