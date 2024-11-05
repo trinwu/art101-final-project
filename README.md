@@ -137,11 +137,11 @@ You should create a ***private*** repository on GitHub, and add as collaborators
 
 You will be able to make the project public, if you so wish, after the project is graded.
 
-### By TBA
+### By November 17
 
-Please provide by Monday May 20 the details on your project, including the members and the GitHub location of the repository, using [this form](https://docs.google.com/forms/d/e/1FAIpQLSderx0Rco4qotKG2-1-tZHpKfNU1lQELCdyn7219QwFr1OACg/viewform?usp=sf_link).
+Please provide by November 17 the details on your project, including the members and the GitHub location of the repository, using [this form](https://docs.google.com/forms/d/e/1FAIpQLSderx0Rco4qotKG2-1-tZHpKfNU1lQELCdyn7219QwFr1OACg/viewform?usp=sf_link).
 
-### By TBA
+### By Thursday, December 12
 
 #### Project submission
 
