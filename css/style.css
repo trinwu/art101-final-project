@@ -1,0 +1,76 @@
+/* General Styling */
+body {
+    font-family: 'Poppins', sans-serif;
+    margin: 0;
+    padding: 0;
+    text-align: center;
+    background-color: #fef7e6;
+}
+
+/* Header Styling */
+header {
+    background-color: #ffd700;
+    padding: 10px 0;
+    border-bottom: 2px solid #f4a261;
+}
+
+header h1 {
+    margin: 0;
+    color: #2a2a2a;
+    font-size: 36px;
+}
+
+/* Filter Buttons */
+#filters {
+    margin: 10px 0;
+}
+
+.filter-button {
+    background-color: #f4a261;
+    border: none;
+    border-radius: 5px;
+    color: white;
+    padding: 10px 15px;
+    margin: 5px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.filter-button:hover {
+    background-color: #e76f51;
+}
+
+/* Egg Container */
+#egg-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin: 20px auto;
+    max-width: 800px;
+}
+
+.egg {
+    width: 80px;
+    height: 80px;
+    background: url('../img/egg.png') no-repeat center center;
+    background-size: contain;
+    margin: 10px;
+    cursor: pointer;
+}
+
+.egg:hover {
+    transform: scale(1.1);
+    transition: transform 0.2s;
+}
+
+/* Footer */
+footer {
+    background-color: #ffd700;
+    padding: 10px 0;
+    margin-top: 20px;
+}
+
+footer p {
+    margin: 0;
+    color: #2a2a2a;
+}
