@@ -25,7 +25,7 @@ header h1 {
     margin: 10px 0;
 }
 
-.filter-button {
+.filter-button, .return-button {
     background-color: #f4a261;
     border: none;
     border-radius: 5px;

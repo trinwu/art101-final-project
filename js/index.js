@@ -22,11 +22,8 @@ function loadEggs() {
         egg.classList.add("egg");
         egg.addEventListener("click", function () {
             const recipe = getRandomRecipe();
-            // Revised code that writes the content of the menu to the pop-up
-            recipeTitle.textContent = recipe.name;
-            recipeOutput.textContent = recipe.recipe;
-            overlay.style.display = "flex";
-
+            // alert(recipe.recipe);
+            popupMessage(recipe.name, recipe.recipe);
         });
         eggContainer.appendChild(egg);
     }
@@ -51,12 +48,17 @@ function setupFilters() {
         button.addEventListener("click", function () {
             const difficulty = button.dataset.filter;
             loadEggs(); // Refresh eggs
-            // Revised code that writes the content of the menu to the pop-up #2
-            recipeTitle.textContent = "Changes made!"
-            recipeOutput.textContent = "Filtered for " + difficulty + " recipes! Click on an egg!"
-            overlay.style.display = "flex";
+            popupMessage("Changes made!", "Filtered for " + difficulty + " recipes! Click on an egg!");
+
         });
     });
+}
+
+// Function that displays and hides the popup. Name takes in the title <h2> and recipe is the message <p>
+function popupMessage (name, recipe) {
+    recipeTitle.textContent = name;
+    recipeOutput.textContent = recipe;
+    overlay.style.display = "flex";
 }
 
 
