@@ -1,12 +1,17 @@
 // List of recipes
 const recipes = [
-    { difficulty: "easy", recipe: "Scrambled Eggs: Beat eggs, cook in butter, season, enjoy!" },
-    { difficulty: "easy", recipe: "Boiled Eggs: Boil eggs for 6-10 minutes, cool, peel, and serve." },
-    { difficulty: "medium", recipe: "Omelette: Beat eggs, add fillings, cook on medium heat." },
-    { difficulty: "medium", recipe: "Egg Salad: Boiled eggs, mayo, mustard, mix and serve." },
-    { difficulty: "hard", recipe: "Soufflé: Separate eggs, whip whites, fold into yolks, bake." },
-    { difficulty: "hard", recipe: "Eggs Benedict: Poach eggs, hollandaise sauce, toasted muffin." },
+    { difficulty: "easy", name: "Scrambled Eggs:", recipe: "Beat eggs, cook in butter, season, enjoy!" },
+    { difficulty: "easy", name: "Boiled Eggs:", recipe: "Boil eggs for 6-10 minutes, cool, peel, and serve." },
+    { difficulty: "medium", name: "Omlette", recipe: "Beat eggs, add fillings, cook on medium heat." },
+    { difficulty: "medium", name: "Egg Salad:", recipe: "Boiled eggs, mayo, mustard, mix and serve." },
+    { difficulty: "hard", name: "Soufflé", recipe: "Separate eggs, whip whites, fold into yolks, bake." },
+    { difficulty: "hard", name: "Eggs Benedict", recipe: "Poach eggs, hollandaise sauce, toasted muffin." },
 ];
+
+const overlay = document.querySelector(".overlay");
+const recipeTitle = document.getElementById("recipeName");
+const recipeOutput = document.getElementById("recipeOutput");
+
 
 // Load eggs dynamically
 function loadEggs() {
@@ -17,7 +22,11 @@ function loadEggs() {
         egg.classList.add("egg");
         egg.addEventListener("click", function () {
             const recipe = getRandomRecipe();
-            alert(recipe.recipe); // Display recipe in an alert
+            // Revised code that writes the content of the menu to the pop-up
+            recipeTitle.textContent = recipe.name;
+            recipeOutput.textContent = recipe.recipe;
+            overlay.style.display = "flex";
+
         });
         eggContainer.appendChild(egg);
     }
@@ -42,9 +51,20 @@ function setupFilters() {
         button.addEventListener("click", function () {
             const difficulty = button.dataset.filter;
             loadEggs(); // Refresh eggs
-            alert("Filtered for " + difficulty + " recipes! Click on an egg.");
+            // Revised code that writes the content of the menu to the pop-up #2
+            recipeTitle.textContent = "Changes made!"
+            recipeOutput.textContent = "Filtered for " + difficulty + " recipes! Click on an egg!"
+            overlay.style.display = "flex";
         });
     });
+}
+
+
+// Function that hides the menu when the return button is clicked
+function hideMenu() {
+    if (overlay) {
+        overlay.style.display = "none";
+    }
 }
 
 // Initialize the app
@@ -53,5 +73,9 @@ function initializeApp() {
     setupFilters();
 }
 
-// Wait for DOM to load
+// Event Listeners
 document.addEventListener("DOMContentLoaded", initializeApp);
+document.getElementById("return").addEventListener("click", hideMenu); // Return button for pop-up menu
+document.addEventListener("keydown", hideMenu); // Escape Key for pop-up menu
+
+
