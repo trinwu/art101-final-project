@@ -43,4 +43,19 @@ db.define_table(
     Field('DURATION_MINUTES', 'double')
 )
 
+# Define a mapping of table names to their corresponding CSV file paths
+seed_data = {
+    "species": r"apps/birds/uploads/species.csv",
+    "sightings": r"apps/birds/uploads/sightings.csv",
+    "checklist": r"apps/birds/uploads/checklists.csv",
+}
+
+# Loop through the mapping and process each table
+for table_name, csv_path in seed_data.items():
+    if db(db[table_name]).isempty():  # Check if the table is empty
+        with open(os.path.join(os.getcwd(), csv_path), 'r') as dumpfile:
+            db[table_name].import_from_csv_file(dumpfile)  # Import data
+        db.commit()  # Commit changes
+
+
 db.commit()

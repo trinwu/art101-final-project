@@ -28,3 +28,29 @@ CREATE TABLE "auth_user_tag_groups"(
     "record_id" INTEGER REFERENCES "auth_user" ("id") ON DELETE CASCADE ON UPDATE CASCADE  
 );
 success!
+timestamp: 2024-12-02T15:50:43.918478
+CREATE TABLE "species"(
+    "id" INTEGER PRIMARY KEY AUTOINCREMENT,
+    "common_name" CHAR(512)
+);
+success!
+timestamp: 2024-12-02T15:50:43.923078
+CREATE TABLE "sightings"(
+    "id" INTEGER PRIMARY KEY AUTOINCREMENT,
+    "sampling_event_identifier" CHAR(512),
+    "common_name" CHAR(512),
+    "observation_count" CHAR(512)
+);
+success!
+timestamp: 2024-12-02T15:50:43.925319
+CREATE TABLE "checklist"(
+    "id" INTEGER PRIMARY KEY AUTOINCREMENT,
+    "sampling_event_identifier" CHAR(512),
+    "latitude" DOUBLE,
+    "longitude" DOUBLE,
+    "observation_date" DATE,
+    "time_observations_started" TIME,
+    "observer_id" CHAR(512),
+    "duration_minutes" DOUBLE
+);
+success!
