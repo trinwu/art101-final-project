@@ -1,0 +1,164 @@
+[[extend 'layout.html']]
+
+<style>
+[v-cloak] {
+    display: none;
+}
+</style>
+
+<div class="section" id="app" v-cloak>
+  <h1 class="title"><i class="fa-solid fa-list"></i> Add Checklist</h1>
+  
+  <!-- Search Bar -->
+  <div class="field">
+    <label class="label">Search Species</label>
+    <div class="control">
+      <input
+        class="input"
+        type="text"
+        v-model="searchQuery"
+        @input="filterSpecies"
+        placeholder="Type to search..."
+      />
+    </div>
+  </div>
+
+  <!-- Filtered Table of Species -->
+  <table class="table is-fullwidth">
+    <thead>
+      <tr>
+        <th>Species Name</th>
+        <th>Number Seen</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr v-for="species in filteredSpecies" :key="species.id">
+        <td>{{ species.COMMON_NAME }}</td>
+        <td>{{ species.count || 0 }}</td>
+        <td>
+          <button class="button is-small is-info" @click="incrementCount(species)">+1</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- Checklist Submission Form -->
+  <form @submit.prevent="submitChecklist">
+    <div class="field">
+      <label class="label">Latitude</label>
+      <div class="control">
+        <input class="input" type="text" v-model="latitude" placeholder="Enter latitude" required>
+      </div>
+    </div>
+
+    <div class="field">
+      <label class="label">Longitude</label>
+      <div class="control">
+        <input class="input" type="text" v-model="longitude" placeholder="Enter longitude" required>
+      </div>
+    </div>
+
+    <div class="field">
+      <label class="label">Date Observed</label>
+      <div class="control">
+        <input class="input" type="date" v-model="observationDate" required>
+      </div>
+    </div>
+
+    <div class="field">
+      <label class="label">Time Observations Started</label>
+      <div class="control">
+        <input class="input" type="time" v-model="timeObservationsStarted" required>
+      </div>
+    </div>
+
+    <div class="field">
+      <label class="label">Duration Observed (minutes)</label>
+      <div class="control">
+        <input class="input" type="number" v-model="durationMinutes" placeholder="Enter duration in minutes" required>
+      </div>
+    </div>
+
+    <div class="field is-grouped">
+      <div class="control">
+        <button type="submit" class="button is-link">Submit Checklist</button>
+      </div>
+      <div class="control">
+        <button type="button" class="button is-light" @click="resetForm">Cancel</button>
+      </div>
+    </div>
+  </form>
+</div>
+
+[[block page_scripts]]
+<script src="https://cdn.jsdelivr.net/npm/vue@3"></script>
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script>
+  const app = Vue.createApp({
+    data() {
+      return {
+        searchQuery: '',
+        speciesList: [],
+        filteredSpecies: [],
+        latitude: '',
+        longitude: '',
+        observationDate: '',
+        timeObservationsStarted: '',
+        durationMinutes: '',
+      };
+    },
+    mounted() {
+      // Fetch species data on mount
+      this.fetchSpecies();
+    },
+    methods: {
+      async fetchSpecies() {
+        try {
+          const response = await axios.get('/get_species');
+          this.speciesList = response.data.species;
+          this.filteredSpecies = this.speciesList;
+        } catch (error) {
+          console.error('Error fetching species data:', error);
+        }
+      },
+      filterSpecies() {
+        this.filteredSpecies = this.speciesList.filter(species =>
+          species.COMMON_NAME.toLowerCase().includes(this.searchQuery.toLowerCase())
+        );
+      },
+      incrementCount(species) {
+        if (!species.count) species.count = 0;
+        species.count++;
+      },
+      resetForm() {
+        this.latitude = '';
+        this.longitude = '';
+        this.observationDate = '';
+        this.timeObservationsStarted = '';
+        this.durationMinutes = '';
+      },
+      async submitChecklist() {
+        const checklist = {
+          latitude: this.latitude,
+          longitude: this.longitude,
+          observationDate: this.observationDate,
+          timeObservationsStarted: this.timeObservationsStarted,
+          durationMinutes: this.durationMinutes,
+          species: this.speciesList.filter(s => s.count > 0), // Include only species with counts > 0
+        };
+
+        try {
+          await axios.post('[[=URL("submit_checklist")]]', checklist);
+          alert('Checklist submitted successfully!');
+          this.resetForm();
+        } catch (error) {
+          console.error('Error submitting checklist:', error);
+        }
+      },
+    },
+  });
+
+  app.mount('#app');
+</script>
+[[end]]

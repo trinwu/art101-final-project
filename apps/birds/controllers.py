@@ -46,3 +46,13 @@ def index():
 def my_callback():
     # The return value should be a dictionary that will be sent as JSON.
     return dict(my_value=3)
+
+@action("get_species", method=["GET"])
+@action.uses(db)
+def get_species():
+    try:
+        species = db(db.species).select().as_list()
+        return dict(species=species)
+    except Exception as e:
+        return dict(error=str(e))
+    
