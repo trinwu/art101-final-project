@@ -56,6 +56,13 @@ def get_species():
     except Exception as e:
         return dict(error=str(e))
 
+@action('my_checklists')
+@action.uses('my_checklists.html', db, auth)
+def my_checklists():
+    # Ensure you fetch and pass the correct data (user's checklists) here
+    checklists = db(db.checklist.user_email == auth.user.email).select()
+    return dict(checklists=checklists)
+
 def checklist():
     """
     Render the edit page for a specific checklist
