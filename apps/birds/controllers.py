@@ -55,4 +55,62 @@ def get_species():
         return dict(species=species)
     except Exception as e:
         return dict(error=str(e))
+
+def checklist():
+    """
+    Render the edit page for a specific checklist
+    URL: /checklist/<checklist_id>
+    """
+    checklist_id = request.args(0)
+    checklist = db.checklists(checklist_id)
     
+    if not checklist:
+        session.flash = 'Checklist not found'
+        redirect(URL('my_checklists'))
+    
+    return dict(checklist=checklist)
+
+def update_checklist():
+    """
+    Update a checklist's information
+    URL: /update_checklist/<checklist_id>
+    """
+    checklist_id = request.args(0)
+    checklist = db.checklists(checklist_id)
+    
+    if not checklist:
+        session.flash = 'Checklist not found'
+        redirect(URL('my_checklists'))
+    
+    # Validate and update the checklist
+    try:
+        # Get form data
+        species_name = request.vars.species_name
+        latitude = float(request.vars.latitude)
+        longitude = float(request.vars.longitude)
+        date_observed = request.vars.date_observed
+        time_observation_started = request.vars.time_observation_started
+        duration_observed = int(request.vars.duration_observed)
+        
+        # Update the record
+        checklist.update_record(
+            species_name=species_name,
+            latitude=latitude,
+            longitude=longitude,
+            date_observed=date_observed,
+            time_observation_started=time_observation_started,
+            duration_observed=duration_observed
+        )
+        
+        # Commit the transaction
+        db.commit()
+        
+        # Set a success message
+        session.flash = 'Checklist updated successfully'
+        redirect(URL('my_checklists'))
+    
+    except Exception as e:
+        # Handle potential errors
+        db.rollback()
+        session.flash = f'Error updating checklist: {str(e)}'
+        redirect(URL('checklist', args=checklist_id))
