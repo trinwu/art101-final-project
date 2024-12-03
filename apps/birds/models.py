@@ -57,5 +57,46 @@ for table_name, csv_path in seed_data.items():
             db[table_name].import_from_csv_file(dumpfile)  # Import data
         db.commit()  # Commit changes
 
+# #specied data 
+# if db(db.species).isempty():
+#     with open('apps/birds/uploads/species.csv', 'r') as f:
+#         reader = csv.reader(f)
+#         next(reader)  #skip header row
+#         for row in reader:
+#             db.species.insert(name=row[0])  
+#     db.commit()
+
+# #checklists data
+# if db(db.checklist).isempty():
+#     with open('apps/birds/uploads/checklists.csv', 'r') as f:
+#         reader = csv.reader(f)
+#         next(reader)  #skip the header row
+#         for row in reader:
+#             db.checklist.insert(
+#                 user_email=row[0],  
+#                 location=row[1],    
+#                 date=row[2],        
+#                 SAMPLING_EVENT_IDENTIFIER=row[3]  
+#             )
+#     db.commit()
+
+# #sightings data 
+# if db(db.sightings).isempty():
+#     with open('apps/birds/uploads/sightings.csv', 'r') as f:
+#         reader = csv.reader(f)
+#         next(reader)  #skip the header row
+#         for row in reader:
+#             try:
+#                 OBSERVATION_COUNT = int(row[2])  
+#             except ValueError:
+#                 OBSERVATION_COUNT = 0
+
+#             db.sightings.insert(
+#                 SAMPLING_EVENT_IDENTIFIER=row[0],  t
+#                 COMMON_NAME=row[1],  
+#                 OBSERVATION_COUNT=OBSERVATION_COUNT,  
+#                 user_email=None  
+#             )
+#     db.commit()
 
 db.commit()
