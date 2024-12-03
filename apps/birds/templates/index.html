@@ -1,106 +1,288 @@
-[[extend 'layout.html']]
-<style>
-[v-cloak] {
-    display: none;
-}
-.nav-buttons {
-    display: flex;
-    justify-content: space-around;
-    margin-bottom: 20px;
-}
-.nav-button {
-    padding: 10px 15px;
-    background-color: #f0f0f0;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-}
-.nav-button:hover {
-    background-color: #e0e0e0;
-}
-.content-section {
-    padding: 20px;
-    background-color: #f9f9f9;
-    border-radius: 8px;
-}
-</style>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bird Watcher</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        :root {
+            /* Light Mode Colors */
+            --bg-color-light: #f4f6f8;
+            --text-color-light: #333;
+            --map-bg-light: white;
+            --button-bg-light: #4CAF50;
+            --button-bg-hover-light: #45a049;
 
-<div class="section" id="app" v-cloak>
-    <h1 class="title"><i class="fa-solid fa-dove"></i> Bird Watcher</h1>
-    
-    <!-- Navigation Buttons -->
-    <div class="nav-buttons">
-        <button 
-            v-for="page in pages" 
-            :key="page.id" 
-            class="nav-button"
-            @click="currentPage = page.id"
-            :class="{ 'active': currentPage === page.id }"
-        >
-            {{ page.name }}
-        </button>
-    </div>
+            /* Dark Mode Colors */
+            --bg-color-dark: #121212;
+            --text-color-dark: #f4f6f8;
+            --map-bg-dark: #2c2c2c;
+            --button-bg-dark: #2196F3;
+            --button-bg-hover-dark: #1E88E5;
+        }
 
-    <!-- Dynamic Content Sections -->
-    <div class="content-section">
-        <!-- Home Page -->
-        <div v-if="currentPage === 'home'" class="home-page">
-            <h2>Welcome to Bird Watcher</h2>
-            <p>Explore bird sightings, track your observations, and connect with other bird enthusiasts!</p>
-            <!-- Placeholder for map -->
-            <div id="bird-density-map" style="height: 400px; background-color: #e0e0e0;">
-                Map Placeholder
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: var(--bg-color-light);
+            color: var(--text-color-light);
+            transition: all 0.3s ease;
+        }
+
+        .container {
+            text-align: center;
+            width: 90%;
+            max-width: 1000px;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            color: var(--text-color-light);
+        }
+
+        .map-container {
+            background-color: var(--map-bg-light);
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+            transition: background-color 0.3s ease;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 15px;
+        }
+
+        .controls select, .controls button {
+            margin: 0 10px;
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        #map {
+            height: 500px;
+            width: 100%;
+            border-radius: 10px;
+        }
+
+        .nav-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .nav-button {
+            display: inline-block;
+            padding: 15px 25px;
+            background-color: var(--button-bg-light);
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+        }
+
+        .nav-button:hover {
+            background-color: var(--button-bg-hover-light);
+            transform: scale(1.05);
+        }
+
+        .theme-toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background-color: #f1f1f1;
+            border: none;
+            border-radius: 5px;
+            padding: 10px;
+            cursor: pointer;
+            font-size: 1.2rem;
+        }
+
+        /* Dark Mode Styles */
+        body.dark-mode {
+            background-color: var(--bg-color-dark);
+            color: var(--text-color-dark);
+        }
+
+        .map-container.dark-mode {
+            background-color: var(--map-bg-dark);
+        }
+
+        .nav-button.dark-mode {
+            background-color: var(--button-bg-dark);
+        }
+
+        .nav-button.dark-mode:hover {
+            background-color: var(--button-bg-hover-dark);
+        }
+
+        .controls select.dark-mode, .controls button.dark-mode {
+            background-color: var(--map-bg-dark);
+            color: var(--text-color-dark);
+            border: 1px solid #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1><i class="fa-solid fa-dove"></i> Bird Watcher</h1>
+
+        <div class="map-container">
+            <div class="controls">
+                <select id="species-select">
+                    <option value="">All Species</option>
+                    <!-- Species will be populated dynamically -->
+                </select>
+                <button id="region-stats-btn">Statistics on Region</button>
             </div>
+
+            <div id="map"></div>
         </div>
 
-        <!-- Stats Page -->
-        <div v-else-if="currentPage === 'stats'" class="stats-page">
-            <h2>My Bird Watching Stats</h2>
-            <p>Track your bird sightings and achievements</p>
-            <!-- Placeholder for stats visualization -->
-        </div>
-
-        <!-- Checklist Page -->
-        <div v-else-if="currentPage === 'checklist'" class="checklist-page">
-            <h2>Submit Bird Checklist</h2>
-            <p>Record your bird observations</p>
-            <!-- Placeholder for checklist entry -->
-        </div>
-
-        <!-- Locations Page -->
-        <div v-else-if="currentPage === 'locations'" class="locations-page">
-            <h2>Bird Watching Locations</h2>
-            <p>Explore birding hotspots and regional statistics</p>
-        </div>
-
-        <!-- About Page -->
-        <div v-else-if="currentPage === 'about'" class="about-page">
-            <h2>About Bird Watcher</h2>
-            <p>A community-driven platform for bird enthusiasts to track and share bird sightings.</p>
+        <div class="nav-buttons">
+            <a href="checklist.html" class="nav-button">Checklist</a>
+            <a href="stats.html" class="nav-button">My Birding Stats</a>
         </div>
     </div>
-</div>
 
-[[block page_scripts]]
-<!-- Loads the index-specific js for Vue -->
-<script>
-let my_callback_url = "[[=XML(my_callback_url)]]";
-</script>
-<script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
-<script>
-new Vue({
-    el: '#app',
-    data: {
-        currentPage: 'home',
-        pages: [
-            { id: 'home', name: 'Home' },
-            { id: 'stats', name: 'My Stats' },
-            { id: 'checklist', name: 'Checklist' },
-            { id: 'locations', name: 'Locations' },
-            { id: 'about', name: 'About' }
-        ]
-    }
-});
-</script>
-[[end]]
+    <button class="theme-toggle" id="theme-toggle">🌙</button>
+
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Configuration and Constants
+            const SPECIES_LIST = [
+                { id: 'sparrow', name: 'Sparrow' },
+                { id: 'eagle', name: 'Eagle' },
+                { id: 'pigeon', name: 'Pigeon' },
+                { id: 'robin', name: 'Robin' }
+            ];
+
+            const themeToggleButton = document.getElementById('theme-toggle');
+
+            // DOM Element References
+            const speciesSelect = document.getElementById('species-select');
+            const regionStatsBtn = document.getElementById('region-stats-btn');
+
+            // Initialize Species Dropdown
+            function populateSpeciesDropdown() {
+                SPECIES_LIST.forEach(species => {
+                    const option = document.createElement('option');
+                    option.value = species.id;
+                    option.textContent = species.name;
+                    speciesSelect.appendChild(option);
+                });
+            }
+
+            // Map Initialization
+            function initializeMap() {
+                // Create map centered on Santa Cruz, CA
+                const map = L.map('map').setView([36.9741, -122.0308], 13);
+
+                // Add OpenStreetMap tile layer
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+                    maxZoom: 19
+                }).addTo(map);
+
+                // Initialize feature group for drawn items
+                const drawnItems = new L.FeatureGroup();
+                map.addLayer(drawnItems);
+
+                // Configure drawing controls
+                const drawControl = new L.Control.Draw({
+                    draw: {
+                        polygon: false,
+                        circle: false,
+                        marker: false,
+                        polyline: false,
+                        circlemarker: false,
+                        rectangle: {
+                            shapeOptions: {
+                                color: 'red'
+                            }
+                        }
+                    },
+                    edit: {
+                        featureGroup: drawnItems
+                    }
+                });
+                map.addControl(drawControl);
+
+                // Handle rectangle drawing
+                map.on(L.Draw.Event.CREATED, function (e) {
+                    const layer = e.layer;
+                    drawnItems.clearLayers(); // Clear previous rectangles
+                    drawnItems.addLayer(layer);
+                });
+
+                return { map, drawnItems };
+            }
+
+            // Event Handlers
+            function setupEventHandlers(map, drawnItems) {
+                // Region stats button handler
+                regionStatsBtn.addEventListener('click', () => {
+                    if (drawnItems.getLayers().length > 0) {
+                        const selectedRegion = drawnItems.getLayers()[0].getBounds();
+                        const regionStats = {
+                            northEast: selectedRegion.getNorthEast(),
+                            southWest: selectedRegion.getSouthWest()
+                        };
+                        
+                        console.log('Selected Region Stats:', regionStats);
+                        alert(`Region Selected: ${JSON.stringify(regionStats)}`);
+                    } else {
+                        alert('Please draw a region on the map first.');
+                    }
+                });
+
+                // Species selection handler
+                speciesSelect.addEventListener('change', (event) => {
+                    const selectedSpecies = event.target.value;
+                    console.log(`Selected Species: ${selectedSpecies || 'All Species'}`);
+                    
+                    // Placeholder: Update map with species-specific data
+                    // Future implementation would fetch and display species-specific heatmap
+                });
+            }
+
+            // Dark/Light Mode Toggle
+            function toggleTheme() {
+                document.body.classList.toggle('dark-mode');
+                const navButtons = document.querySelectorAll('.nav-button');
+                const controls = document.querySelectorAll('.controls select, .controls button');
+                
+                navButtons.forEach(btn => btn.classList.toggle('dark-mode'));
+                controls.forEach(ctrl => ctrl.classList.toggle('dark-mode'));
+                
+                themeToggleButton.textContent = document.body.classList.contains('dark-mode') ? '🌞' : '🌙';
+            }
+
+            // Main Initialization
+            function init() {
+                populateSpeciesDropdown();
+                const { map, drawnItems } = initializeMap();
+                setupEventHandlers(map, drawnItems);
+            }
+
+            // Initialize theme and set event listener
+            themeToggleButton.addEventListener('click', toggleTheme);
+
+            // Start the application
+            init();
+        });
+    </script>
+</body>
+</html>
