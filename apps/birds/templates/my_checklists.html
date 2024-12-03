@@ -1,0 +1,82 @@
+[[extend 'layout.html']]
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Checklists</title>
+    <!-- Link to Bulma CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+    <style>
+        /* Make the table scrollable on smaller screens */
+        @media screen and (max-width: 768px) {
+            table {
+                display: block;
+                overflow-x: auto;
+                white-space: nowrap;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container is-widescreen is-fluid">
+        <!-- Navigation Bar with Back and Add Checklist Buttons -->
+        <div class="level">
+            <div class="level-left">
+                <a href="{{=URL('map')}}" class="button is-link is-light is-small">Back to Map</a>
+            </div>
+            <div class="level-right">
+                <a href="{{=URL('add_checklist')}}" class="button is-primary is-small">Add Checklist</a>
+            </div>
+        </div>
+
+        <h1 class="title has-text-centered">My Submitted Checklists</h1>
+        
+        <div class="table-container">
+            <table class="table is-fullwidth is-bordered is-small">
+                <thead>
+                    <tr>
+                        <th>Species Name</th>
+                        <th>Latitude</th>
+                        <th>Longitude</th>
+                        <th>Date Observed</th>
+                        <th>Time Observation Started</th>
+                        <th>Duration Observed (mins)</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{for checklist in checklists:}}
+                        <tr>
+                            <td>{{=checklist.species_name}}</td>
+                            <td>{{=checklist.latitude}}</td>
+                            <td>{{=checklist.longitude}}</td>
+                            <td>{{=checklist.date_observed}}</td>
+                            <td>{{=checklist.time_observation_started}}</td>
+                            <td>{{=checklist.duration_observed}}</td>
+                            <td>
+                                <!-- Edit is now a clickable text -->
+                                <a href="{{=URL('checklist', checklist.id)}}" class="has-text-info">Edit</a> |
+                                <!-- Delete action -->
+                                <a href="{{=URL('delete_checklist', checklist.id)}}" class="has-text-danger" onclick="return confirm('Are you sure you want to delete this checklist?');">Delete</a>
+                            </td>
+                        </tr>
+                    {{pass}}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html>
+
+
+[[block page_scripts]]
+<script>
+//   const load_checklists_url = "[[=URL('load_checklists')]]";
+//   const delete_checklist_url = "[[=URL('delete_checklist')]]";
+//   const edit_checklist_url = "[[=URL('edit_checklist')]]";
+//   let drawn_coordinates = JSON.parse('[[=XML(drawn_coordinates)]]');
+</script>
+<script src="js/my_checklists.js"></script>
+[[end]]
