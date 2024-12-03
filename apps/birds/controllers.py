@@ -121,3 +121,8 @@ def update_checklist():
         db.rollback()
         session.flash = f'Error updating checklist: {str(e)}'
         redirect(URL('checklist', args=checklist_id))
+
+@action('add_checklist')
+@action.uses('add_checklist.html', db, auth)
+def add_checklist():
+    return dict()
