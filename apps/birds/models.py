@@ -14,13 +14,7 @@ def get_user_email():
 def get_time():
     return datetime.datetime.utcnow()
 
-
 ### Define your table below
-#
-# db.define_table('thing', Field('name'))
-#
-## always commit your models to avoid problems later
-
 db.define_table(
     'species',
     Field('COMMON_NAME', 'string')
@@ -44,60 +38,69 @@ db.define_table(
     Field('DURATION_MINUTES', 'double')
 )
 
-# Define a mapping of table names to their corresponding CSV file paths
-seed_data = {
-    "species": r"apps/birds/uploads/species.csv",
-    "sightings": r"apps/birds/uploads/sightings.csv",
-    "checklist": r"apps/birds/uploads/checklists.csv",
-}
+### Data Seeding ###
+def seed_species():
+    """Seed the species table from species.csv."""
+    csv_path = os.path.join(os.getcwd(), "apps/birds/uploads/species.csv")
+    if db(db.species).isempty():  # Check if the species table is empty
+        try:
+            with open(csv_path, 'r') as f:
+                reader = csv.DictReader(f)
+                for row in reader:
+                    db.species.insert(COMMON_NAME=row['COMMON_NAME'])
+            db.commit()
+            print("Species table seeded successfully.")
+        except Exception as e:
+            print(f"Error seeding species table: {e}")
 
-# Loop through the mapping and process each table
-for table_name, csv_path in seed_data.items():
-    if db(db[table_name]).isempty():  # Check if the table is empty
-        with open(os.path.join(os.getcwd(), csv_path), 'r') as dumpfile:
-            db[table_name].import_from_csv_file(dumpfile)  # Import data
-        db.commit()  # Commit changes
+def seed_sightings():
+    """Seed the sightings table from sightings.csv."""
+    csv_path = os.path.join(os.getcwd(), "apps/birds/uploads/sightings.csv")
+    if db(db.sightings).isempty():  # Check if the sightings table is empty
+        try:
+            with open(csv_path, 'r') as f:
+                reader = csv.DictReader(f)
+                for row in reader:
+                    try:
+                        OBSERVATION_COUNT = int(row['OBSERVATION_COUNT'])
+                    except ValueError:
+                        OBSERVATION_COUNT = 0  # Default to 0 if parsing fails
+                    db.sightings.insert(
+                        SAMPLING_EVENT_IDENTIFIER=row['SAMPLING_EVENT_IDENTIFIER'],
+                        COMMON_NAME=row['COMMON_NAME'],
+                        OBSERVATION_COUNT=OBSERVATION_COUNT
+                    )
+            db.commit()
+            print("Sightings table seeded successfully.")
+        except Exception as e:
+            print(f"Error seeding sightings table: {e}")
 
-# #specied data 
-# if db(db.species).isempty():
-#     with open('apps/birds/uploads/species.csv', 'r') as f:
-#         reader = csv.reader(f)
-#         next(reader)  #skip header row
-#         for row in reader:
-#             db.species.insert(name=row[0])  
-#     db.commit()
+def seed_checklist():
+    """Seed the checklist table from checklists.csv."""
+    csv_path = os.path.join(os.getcwd(), "apps/birds/uploads/checklists.csv")
+    if db(db.checklist).isempty():  # Check if the checklist table is empty
+        try:
+            with open(csv_path, 'r') as f:
+                reader = csv.DictReader(f)
+                for row in reader:
+                    db.checklist.insert(
+                        SAMPLING_EVENT_IDENTIFIER=row['SAMPLING_EVENT_IDENTIFIER'],
+                        LATITUDE=float(row['LATITUDE']),
+                        LONGITUDE=float(row['LONGITUDE']),
+                        OBSERVATION_DATE=row['OBSERVATION_DATE'],
+                        TIME_OBSERVATIONS_STARTED=row['TIME_OBSERVATIONS_STARTED'],
+                        OBSERVER_ID=row['OBSERVER_ID'],
+                        DURATION_MINUTES=float(row['DURATION_MINUTES'])
+                    )
+            db.commit()
+            print("Checklist table seeded successfully.")
+        except Exception as e:
+            print(f"Error seeding checklist table: {e}")
 
-# #checklists data
-# if db(db.checklist).isempty():
-#     with open('apps/birds/uploads/checklists.csv', 'r') as f:
-#         reader = csv.reader(f)
-#         next(reader)  #skip the header row
-#         for row in reader:
-#             db.checklist.insert(
-#                 user_email=row[0],  
-#                 location=row[1],    
-#                 date=row[2],        
-#                 SAMPLING_EVENT_IDENTIFIER=row[3]  
-#             )
-#     db.commit()
+# Seed the tables
+seed_species()
+seed_sightings()
+seed_checklist()
 
-# #sightings data 
-# if db(db.sightings).isempty():
-#     with open('apps/birds/uploads/sightings.csv', 'r') as f:
-#         reader = csv.reader(f)
-#         next(reader)  #skip the header row
-#         for row in reader:
-#             try:
-#                 OBSERVATION_COUNT = int(row[2])  
-#             except ValueError:
-#                 OBSERVATION_COUNT = 0
-
-#             db.sightings.insert(
-#                 SAMPLING_EVENT_IDENTIFIER=row[0],  t
-#                 COMMON_NAME=row[1],  
-#                 OBSERVATION_COUNT=OBSERVATION_COUNT,  
-#                 user_email=None  
-#             )
-#     db.commit()
-
+# Always commit your changes to avoid problems later
 db.commit()

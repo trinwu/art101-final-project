@@ -24,8 +24,8 @@
                     class="input"
                     type="text"
                     v-model="searchQuery"
-                    @input="filterSpecies"
-                    placeholder="Type to search..."
+                    @input="fetchSpecies"
+                    placeholder="Type to search species..."
                 />
             </div>
         </div>
@@ -42,9 +42,19 @@
             <tbody>
                 <tr v-for="species in filteredSpecies" :key="species.id">
                     <td>{{ species.COMMON_NAME }}</td>
-                    <td>{{ species.count || 0 }}</td>
                     <td>
-                        <button class="button is-small is-info" @click="incrementCount(species)">+1</button>
+                        <input
+                            type="number"
+                            class="input is-small"
+                            v-model.number="species.count"
+                            min="0"
+                        />
+                    </td>
+                    <td>
+                        <button
+                            class="button is-small is-info"
+                            @click="incrementCount(species)"
+                        >+1</button>
                     </td>
                 </tr>
             </tbody>
@@ -89,7 +99,7 @@
 
             <div class="field is-grouped">
                 <div class="control">
-                    <a href="/birds/my_checklists" class="button is-link">Submit Checklist</a>
+                    <button type="submit" class="button is-link">Submit Checklist</button>
                 </div>
                 <div class="control">
                     <button type="button" class="button is-light" @click="resetForm">Cancel</button>
@@ -121,17 +131,17 @@
             methods: {
                 async fetchSpecies() {
                     try {
-                        const response = await axios.get('/get_species');
-                        this.speciesList = response.data.species;
+                        const response = await axios.get('/search_species', {
+                            params: { q: this.searchQuery },
+                        });
+                        this.speciesList = response.data.species.map(s => ({
+                            ...s,
+                            count: 0, // Initialize count for each species
+                        }));
                         this.filteredSpecies = this.speciesList;
                     } catch (error) {
                         console.error('Error fetching species data:', error);
                     }
-                },
-                filterSpecies() {
-                    this.filteredSpecies = this.speciesList.filter(species =>
-                        species.COMMON_NAME.toLowerCase().includes(this.searchQuery.toLowerCase())
-                    );
                 },
                 incrementCount(species) {
                     if (!species.count) species.count = 0;
@@ -143,6 +153,8 @@
                     this.observationDate = '';
                     this.timeObservationsStarted = '';
                     this.durationMinutes = '';
+                    this.speciesList.forEach(s => s.count = 0);
+                    this.filteredSpecies = [...this.speciesList];
                 },
                 async submitChecklist() {
                     const checklist = {
@@ -155,9 +167,11 @@
                     };
 
                     try {
-                        await axios.post('[[=URL("submit_checklist")]]', checklist);
+                        await axios.post('/submit_checklist', checklist);
                         alert('Checklist submitted successfully!');
                         this.resetForm();
+                        // Redirect to my_checklists.html
+                        window.location.href = '/birds/my_checklists';
                     } catch (error) {
                         console.error('Error submitting checklist:', error);
                     }
