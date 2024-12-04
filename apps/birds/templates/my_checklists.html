@@ -1,89 +1,78 @@
 [[extend 'layout.html']]
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Edit Checklist</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
-</head>
-<body>
-    <div class="container">
-        <h1 class="title has-text-centered">Edit Checklist</h1>
-        
-        <form action="{{=URL('update_checklist', args=checklist.id)}}" method="POST">
-            <div class="columns">
-                <div class="column">
-                    <div class="field">
-                        <label class="label">Species Name</label>
-                        <div class="control">
-                            <input class="input" type="text" name="species_name" 
-                                   value="{{=checklist.species_name}}" required>
-                        </div>
-                    </div>
-                </div>
-                <div class="column">
-                    <div class="field">
-                        <label class="label">Latitude</label>
-                        <div class="control">
-                            <input class="input" type="number" step="any" name="latitude" 
-                                   value="{{=checklist.latitude}}" required>
-                        </div>
-                    </div>
-                </div>
-            </div>
 
-            <div class="columns">
-                <div class="column">
-                    <div class="field">
-                        <label class="label">Longitude</label>
-                        <div class="control">
-                            <input class="input" type="number" step="any" name="longitude" 
-                                   value="{{=checklist.longitude}}" required>
-                        </div>
-                    </div>
-                </div>
-                <div class="column">
-                    <div class="field">
-                        <label class="label">Date Observed</label>
-                        <div class="control">
-                            <input class="input" type="date" name="date_observed" 
-                                   value="{{=checklist.date_observed}}" required>
-                        </div>
-                    </div>
-                </div>
-            </div>
+<style>
+  [v-cloak] {
+    display: none;
+  }
+</style>
 
-            <div class="columns">
-                <div class="column">
-                    <div class="field">
-                        <label class="label">Time Observation Started</label>
-                        <div class="control">
-                            <input class="input" type="time" name="time_observation_started" 
-                                   value="{{=checklist.time_observation_started}}" required>
-                        </div>
-                    </div>
-                </div>
-                <div class="column">
-                    <div class="field">
-                        <label class="label">Duration Observed (mins)</label>
-                        <div class="control">
-                            <input class="input" type="number" name="duration_observed" 
-                                   value="{{=checklist.duration_observed}}" required>
-                        </div>
-                    </div>
-                </div>
-            </div>
+<div class="section" id="app" v-cloak>
+  <h1 class="title"><i class="fa-solid fa-list"></i> My Checklists</h1>
 
-            <div class="field is-grouped">
-                <div class="control">
-                    <button class="button is-primary" type="submit">Update Checklist</button>
-                </div>
-                <div class="control">
-                    <a href="{{=URL('my_checklists')}}" class="button is-link is-light">Cancel</a>
-                </div>
-            </div>
-        </form>
-    </div>
-</body>
-</html>
+  <!-- Checklist Table -->
+  <table class="table is-fullwidth">
+    <thead>
+      <tr>
+        <th>Species Name</th>
+        <th>Latitude</th>
+        <th>Longitude</th>
+        <th>Date Observed</th>
+        <th>Time Observation Started</th>
+        <th>Duration Observed (mins)</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr v-for="checklist in checklists" :key="checklist.id">
+        <td>{{ checklist.species_name }}</td>
+        <td>{{ checklist.latitude }}</td>
+        <td>{{ checklist.longitude }}</td>
+        <td>{{ checklist.date_observed }}</td>
+        <td>{{ checklist.time_observation_started }}</td>
+        <td>{{ checklist.duration_observed }}</td>
+        <td>
+          <a :href="`/edit_checklist/${checklist.id}`" class="button is-small is-info">Edit</a>
+          <button @click="deleteChecklist(checklist.id)" class="button is-small is-danger">Delete</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+[[block page_scripts]]
+<script src="https://cdn.jsdelivr.net/npm/vue@3"></script>
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script>
+  const app = Vue.createApp({
+    data() {
+      return {
+        checklists: [],
+      };
+    },
+    mounted() {
+      this.fetchChecklists();
+    },
+    methods: {
+      async fetchChecklists() {
+        try {
+          const response = await axios.get('/get_checklists');
+          this.checklists = response.data.checklists;
+        } catch (error) {
+          console.error('Error fetching checklists:', error);
+        }
+      },
+      async deleteChecklist(id) {
+        try {
+          await axios.delete(`/delete_checklist/${id}`);
+          alert('Checklist deleted successfully!');
+          this.fetchChecklists();  // Re-fetch the list after deletion
+        } catch (error) {
+          console.error('Error deleting checklist:', error);
+        }
+      },
+    },
+  });
+
+  app.mount('#app');
+</script>
+[[end]]
