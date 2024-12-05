@@ -139,3 +139,14 @@ def my_checklists():
 @action.uses('stats.html', db, auth)
 def stats():
     return dict()
+
+@action("search_species", method=["GET"])
+@action.uses(db)
+def search_species():
+    query = request.params.get("q", "").strip().lower()  # Get the search query and strip whitespace
+    species = []
+    if query:  # Only perform search if query is not empty
+        # Filter species by name containing the query
+        species = db(db.species.COMMON_NAME.contains(query)).select().as_list()
+    return dict(species=species)
+

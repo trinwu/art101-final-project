@@ -61,45 +61,50 @@
         </table>
 
         <!-- Checklist Submission Form -->
-        <form @submit.prevent="submitChecklist">
+        <form @submit.prevent="validateAndSubmit">
             <div class="field">
                 <label class="label">Latitude</label>
                 <div class="control">
-                    <input class="input" type="text" v-model="latitude" placeholder="Enter latitude" required>
+                    <input class="input" type="text" v-model="latitude" placeholder="Enter latitude">
                 </div>
+                <p v-if="errors.latitude" class="help is-danger">{{ errors.latitude }}</p>
             </div>
 
             <div class="field">
                 <label class="label">Longitude</label>
                 <div class="control">
-                    <input class="input" type="text" v-model="longitude" placeholder="Enter longitude" required>
+                    <input class="input" type="text" v-model="longitude" placeholder="Enter longitude">
                 </div>
+                <p v-if="errors.longitude" class="help is-danger">{{ errors.longitude }}</p>
             </div>
 
             <div class="field">
                 <label class="label">Date Observed</label>
                 <div class="control">
-                    <input class="input" type="date" v-model="observationDate" required>
+                    <input class="input" type="date" v-model="observationDate">
                 </div>
+                <p v-if="errors.observationDate" class="help is-danger">{{ errors.observationDate }}</p>
             </div>
 
             <div class="field">
                 <label class="label">Time Observations Started</label>
                 <div class="control">
-                    <input class="input" type="time" v-model="timeObservationsStarted" required>
+                    <input class="input" type="time" v-model="timeObservationsStarted">
                 </div>
+                <p v-if="errors.timeObservationsStarted" class="help is-danger">{{ errors.timeObservationsStarted }}</p>
             </div>
 
             <div class="field">
                 <label class="label">Duration Observed (minutes)</label>
                 <div class="control">
-                    <input class="input" type="number" v-model="durationMinutes" placeholder="Enter duration in minutes" required>
+                    <input class="input" type="number" v-model="durationMinutes" placeholder="Enter duration in minutes">
                 </div>
+                <p v-if="errors.durationMinutes" class="help is-danger">{{ errors.durationMinutes }}</p>
             </div>
 
             <div class="field is-grouped">
                 <div class="control">
-                    <a href="/birds/my_checklists" class="button is-link">Submit Checklist</a>
+                    <button type="submit" class="button is-link" :disabled="hasErrors">Submit Checklist</button>
                 </div>
                 <div class="control">
                     <button type="button" class="button is-light" @click="resetForm">Cancel</button>
@@ -122,16 +127,18 @@
                     observationDate: '',
                     timeObservationsStarted: '',
                     durationMinutes: '',
+                    errors: {}, // Object to hold field-specific errors
                 };
             },
-            mounted() {
-                // Fetch species data on mount
-                this.fetchSpecies();
+            computed: {
+                hasErrors() {
+                    return Object.keys(this.errors).length > 0;
+                },
             },
             methods: {
                 async fetchSpecies() {
                     try {
-                        const response = await axios.get('/search_species', {
+                        const response = await axios.get('/birds/search_species', {
                             params: { q: this.searchQuery },
                         });
                         this.speciesList = response.data.species.map(s => ({
@@ -153,8 +160,34 @@
                     this.observationDate = '';
                     this.timeObservationsStarted = '';
                     this.durationMinutes = '';
-                    this.speciesList.forEach(s => s.count = 0);
-                    this.filteredSpecies = [...this.speciesList];
+                    this.errors = {};
+                },
+                validateAndSubmit() {
+                    this.errors = {};
+
+                    if (!this.latitude) {
+                        this.errors.latitude = 'Latitude is required.';
+                    }
+                    if (!this.longitude) {
+                        this.errors.longitude = 'Longitude is required.';
+                    }
+                    if (!this.observationDate) {
+                        this.errors.observationDate = 'Observation date is required.';
+                    }
+                    if (!this.timeObservationsStarted) {
+                        this.errors.timeObservationsStarted = 'Time observations started is required.';
+                    }
+                    if (!this.durationMinutes) {
+                        this.errors.durationMinutes = 'Duration observed is required.';
+                    }
+                    if (!this.filteredSpecies.some(s => s.count > 0)) {
+                        alert('At least one species must have a count greater than 0.');
+                        return;
+                    }
+
+                    if (!this.hasErrors) {
+                        this.submitChecklist();
+                    }
                 },
                 async submitChecklist() {
                     const checklist = {
@@ -163,14 +196,13 @@
                         observationDate: this.observationDate,
                         timeObservationsStarted: this.timeObservationsStarted,
                         durationMinutes: this.durationMinutes,
-                        species: this.speciesList.filter(s => s.count > 0), // Include only species with counts > 0
+                        species: this.filteredSpecies.filter(s => s.count > 0),
                     };
 
                     try {
                         await axios.post('/submit_checklist', checklist);
                         alert('Checklist submitted successfully!');
                         this.resetForm();
-                        // Redirect to my_checklists.html
                         window.location.href = '/birds/my_checklists';
                     } catch (error) {
                         console.error('Error submitting checklist:', error);
