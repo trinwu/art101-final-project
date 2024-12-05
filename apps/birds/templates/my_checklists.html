@@ -24,12 +24,12 @@
     </thead>
     <tbody>
       <tr v-for="checklist in checklists" :key="checklist.id">
-        <td>{{ checklist.species_name }}</td>
-        <td>{{ checklist.latitude }}</td>
-        <td>{{ checklist.longitude }}</td>
-        <td>{{ checklist.date_observed }}</td>
-        <td>{{ checklist.time_observation_started }}</td>
-        <td>{{ checklist.duration_observed }}</td>
+        <td>{{ checklist.COMMON_NAME }}</td>
+        <td>{{ checklist.LATITUDE }}</td>
+        <td>{{ checklist.LONGITUDE }}</td>
+        <td>{{ checklist.OBSERVATION_DATE }}</td>
+        <td>{{ checklist.TIME_OBSERVATIONS_STARTED }}</td>
+        <td>{{ checklist.DURATION_MINUTES }}</td>
         <td>
           <a :href="`/edit_checklist/${checklist.id}`" class="button is-small is-info">Edit</a>
           <button @click="deleteChecklist(checklist.id)" class="button is-small is-danger">Delete</button>

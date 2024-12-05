@@ -177,3 +177,4 @@ def submit_checklist():
     except Exception as e:
         db.rollback()
         return dict(status="error", message=str(e))
+    
