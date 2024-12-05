@@ -141,6 +141,7 @@
                         const response = await axios.get('/birds/search_species', {
                             params: { q: this.searchQuery },
                         });
+                        console.log("Response from search_species:", response.data);
                         this.speciesList = response.data.species.map(s => ({
                             ...s,
                             count: 0, // Initialize count for each species
@@ -150,6 +151,7 @@
                         console.error('Error fetching species data:', error);
                     }
                 },
+
                 incrementCount(species) {
                     if (!species.count) species.count = 0;
                     species.count++;

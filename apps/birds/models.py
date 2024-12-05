@@ -42,16 +42,22 @@ db.define_table(
 def seed_species():
     """Seed the species table from species.csv."""
     csv_path = os.path.join(os.getcwd(), "apps/birds/uploads/species.csv")
-    if db(db.species).isempty():  # Check if the species table is empty
+    # Clear the table if it already has data
+    db(db.species.id > 0).delete()
+    db.commit()
+    if os.path.exists(csv_path):
         try:
             with open(csv_path, 'r') as f:
                 reader = csv.DictReader(f)
                 for row in reader:
-                    db.species.insert(COMMON_NAME=row['COMMON_NAME'])
+                    db.species.insert(COMMON_NAME=row['COMMON NAME'].strip())
             db.commit()
             print("Species table seeded successfully.")
         except Exception as e:
             print(f"Error seeding species table: {e}")
+    else:
+        print(f"File not found: {csv_path}")
+
 
 def seed_sightings():
     """Seed the sightings table from sightings.csv."""
