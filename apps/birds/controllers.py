@@ -115,6 +115,16 @@ def update_checklist():
         session.flash = f'Error updating checklist: {str(e)}'
         redirect(URL('checklist', args=checklist_id))
 
+@action('get_checklists', method=["GET"])
+@action.uses(db, auth.user)
+def get_checklists():
+    try:
+        checklists = db(db.checklist).select().as_list()
+        return dict(checklists=checklists)
+    except Exception as e:
+        return dict(error=str(e))
+
+
 @action('add_checklist')
 @action.uses('add_checklist.html', db, auth)
 def add_checklist():
