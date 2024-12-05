@@ -84,19 +84,22 @@ def seed_sightings():
 def seed_checklist():
     """Seed the checklist table from checklists.csv."""
     csv_path = os.path.join(os.getcwd(), "apps/birds/uploads/checklists.csv")
+    # Clear the table if it already has data
+    db(db.species.id > 0).delete()
+    db.commit()
     if db(db.checklist).isempty():  # Check if the checklist table is empty
         try:
             with open(csv_path, 'r') as f:
                 reader = csv.DictReader(f)
                 for row in reader:
                     db.checklist.insert(
-                        SAMPLING_EVENT_IDENTIFIER=row['SAMPLING_EVENT_IDENTIFIER'],
+                        SAMPLING_EVENT_IDENTIFIER=row['SAMPLING EVENT IDENTIFIER'],
                         LATITUDE=float(row['LATITUDE']),
                         LONGITUDE=float(row['LONGITUDE']),
-                        OBSERVATION_DATE=row['OBSERVATION_DATE'],
-                        TIME_OBSERVATIONS_STARTED=row['TIME_OBSERVATIONS_STARTED'],
-                        OBSERVER_ID=row['OBSERVER_ID'],
-                        DURATION_MINUTES=float(row['DURATION_MINUTES'])
+                        OBSERVATION_DATE=row['OBSERVATION DATE'],
+                        TIME_OBSERVATIONS_STARTED=row['TIME OBSERVATIONS STARTED'],
+                        OBSERVER_ID=row['OBSERVER ID'],
+                        DURATION_MINUTES=float(row['DURATION MINUTES'])
                     )
             db.commit()
             print("Checklist table seeded successfully.")
