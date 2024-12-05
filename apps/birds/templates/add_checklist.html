@@ -132,7 +132,14 @@
             },
             computed: {
                 hasErrors() {
-                    return Object.keys(this.errors).length > 0;
+                    return (
+                        !this.latitude ||
+                        !this.longitude ||
+                        !this.observationDate ||
+                        !this.timeObservationsStarted ||
+                        !this.durationMinutes ||
+                        !this.filteredSpecies.some(s => s.count > 0)
+                    );
                 },
             },
             methods: {
@@ -162,31 +169,10 @@
                     this.observationDate = '';
                     this.timeObservationsStarted = '';
                     this.durationMinutes = '';
+                    this.filteredSpecies = [];
                     this.errors = {};
                 },
                 validateAndSubmit() {
-                    this.errors = {};
-
-                    if (!this.latitude) {
-                        this.errors.latitude = 'Latitude is required.';
-                    }
-                    if (!this.longitude) {
-                        this.errors.longitude = 'Longitude is required.';
-                    }
-                    if (!this.observationDate) {
-                        this.errors.observationDate = 'Observation date is required.';
-                    }
-                    if (!this.timeObservationsStarted) {
-                        this.errors.timeObservationsStarted = 'Time observations started is required.';
-                    }
-                    if (!this.durationMinutes) {
-                        this.errors.durationMinutes = 'Duration observed is required.';
-                    }
-                    if (!this.filteredSpecies.some(s => s.count > 0)) {
-                        alert('At least one species must have a count greater than 0.');
-                        return;
-                    }
-
                     if (!this.hasErrors) {
                         this.submitChecklist();
                     }
@@ -202,8 +188,7 @@
                     };
 
                     try {
-                        await axios.post('/submit_checklist', checklist);
-                        alert('Checklist submitted successfully!');
+                        await axios.post('/birds/submit_checklist', checklist);
                         this.resetForm();
                         window.location.href = '/birds/my_checklists';
                     } catch (error) {

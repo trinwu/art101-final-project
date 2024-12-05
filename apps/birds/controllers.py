@@ -150,3 +150,30 @@ def search_species():
         species = db(db.species.COMMON_NAME.contains(query)).select().as_list()
     return dict(species=species)
 
+@action("submit_checklist", method=["POST"])
+@action.uses(db)
+def submit_checklist():
+    try:
+        data = request.json
+        checklist_data = {
+            "LATITUDE": float(data.get("latitude")),
+            "LONGITUDE": float(data.get("longitude")),
+            "OBSERVATION_DATE": data.get("observationDate"),
+            "TIME_OBSERVATIONS_STARTED": data.get("timeObservationsStarted"),
+            "DURATION_MINUTES": float(data.get("durationMinutes")),
+        }
+        checklist_id = db.checklist.insert(**checklist_data)
+
+        # Handle species data
+        species = data.get("species", [])
+        for s in species:
+            db.sightings.insert(
+                SAMPLING_EVENT_IDENTIFIER=checklist_id,
+                COMMON_NAME=s.get("COMMON_NAME"),
+                OBSERVATION_COUNT=s.get("count"),
+            )
+        db.commit()
+        return dict(status="success")
+    except Exception as e:
+        db.rollback()
+        return dict(status="error", message=str(e))
