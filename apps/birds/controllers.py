@@ -134,3 +134,8 @@ def add_checklist():
 @action.uses('my_checklists.html', db, auth)
 def my_checklists():
     return dict()
+
+@action('stats')
+@action.uses('stats.html', db, auth)
+def stats():
+    return dict()
