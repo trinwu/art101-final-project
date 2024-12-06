@@ -67,69 +67,88 @@ async function loadEggs() {
     }
 }
 
-// Fetch chicken recipes from TheMealDB API
+// Fetch recipes with "chicken" and "chicken_breast" as main ingredients from TheMealDB API
 async function fetchChickenRecipes() {
     try {
-        // Filter meals by chicken ingredient
-        const url = `${BASE_URL}/filter.php?i=chicken`;
-        const response = await fetch(url);
-        
-        // Check if response is successful
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+        // Fetch recipes where chicken is the main ingredient
+        const chickenUrl = `${BASE_URL}/filter.php?i=chicken`;
+        const chickenResponse = await fetch(chickenUrl);
+
+        if (!chickenResponse.ok) {
+            throw new Error(`HTTP error for chicken! status: ${chickenResponse.status}`);
         }
+        const chickenData = await chickenResponse.json();
 
-        const data = await response.json();
-        
-        // Log raw data for debugging
-        console.log("Raw API Data:", data);
+        // Fetch recipes where chicken_breast is the main ingredient
+        const chickenBreastUrl = `${BASE_URL}/filter.php?i=chicken_breast`;
+        const chickenBreastResponse = await fetch(chickenBreastUrl);
 
-        // Ensure meals exist before mapping
-        if (!data.meals || !Array.isArray(data.meals)) {
-            throw new Error("No chicken recipes found");
+        if (!chickenBreastResponse.ok) {
+            throw new Error(`HTTP error for chicken_breast! status: ${chickenBreastResponse.status}`);
+        }
+        const chickenBreastData = await chickenBreastResponse.json();
+
+        // Combine the recipes
+        const allMeals = [
+            ...(chickenData.meals || []),
+            ...(chickenBreastData.meals || [])
+        ];
+
+        // Log the number of recipes fetched
+        console.log(`Initial fetch: Found ${allMeals.length} recipes with chicken and chicken_breast as main ingredients.`);
+
+        if (allMeals.length === 0) {
+            throw new Error("No recipes with chicken or chicken_breast found");
         }
 
         // Fetch detailed information for each recipe
         const detailedRecipes = await Promise.all(
-            data.meals.map(async (meal) => {
-                const detailUrl = `${BASE_URL}/lookup.php?i=${meal.idMeal}`;
-                const detailResponse = await fetch(detailUrl);
-                const detailData = await detailResponse.json();
-                return detailData.meals[0];
+            allMeals.map(async (meal) => {
+                try {
+                    const detailUrl = `${BASE_URL}/lookup.php?i=${meal.idMeal}`;
+                    const detailResponse = await fetch(detailUrl);
+                    const detailData = await detailResponse.json();
+
+                    const mealDetails = detailData.meals[0];
+                    const ingredients = [];
+
+                    // Extract ingredients and measurements
+                    for (let i = 1; i <= 20; i++) {
+                        const ingredient = mealDetails[`strIngredient${i}`];
+                        const measure = mealDetails[`strMeasure${i}`];
+
+                        if (ingredient && ingredient.trim() !== '') {
+                            ingredients.push(`${measure ? measure + ' ' : ''}${ingredient}`);
+                        }
+                    }
+
+                    return {
+                        id: mealDetails.idMeal,
+                        name: mealDetails.strMeal,
+                        instructions: mealDetails.strInstructions,
+                        ingredients: ingredients,
+                        difficulty: getDifficulty(mealDetails.strInstructions)
+                    };
+                } catch (err) {
+                    console.error(`Error fetching details for recipe ${meal.idMeal}:`, err);
+                    return null;
+                }
             })
         );
 
-        // Map and filter recipes
-        mealRecipes = detailedRecipes.map(meal => {
-            // Extract ingredients
-            const ingredients = [];
-            for (let i = 1; i <= 20; i++) {
-                const ingredient = meal[`strIngredient${i}`];
-                const measure = meal[`strMeasure${i}`];
-                
-                if (ingredient && ingredient.trim() !== '') {
-                    ingredients.push(`${measure ? measure + ' ' : ''}${ingredient}`);
-                }
-            }
+        // Filter out any null recipes and assign to mealRecipes
+        mealRecipes = detailedRecipes.filter(recipe => recipe !== null);
 
-            return {
-                id: meal.idMeal,
-                name: meal.strMeal,
-                instructions: meal.strInstructions,
-                ingredients: ingredients,
-                difficulty: getDifficulty(meal.strInstructions)
-            };
-        });
-
-        // If no recipes found, use fallback
-        if (mealRecipes.length === 0) {
-            throw new Error("No chicken recipes found");
-        }
+        // Log the number of detailed recipes successfully fetched
+        console.log(`Detailed fetch: Successfully retrieved ${mealRecipes.length} detailed recipes from both chicken and chicken_breast.`);
     } catch (error) {
         console.error("Detailed Fetch Error:", error);
         throw error;
     }
 }
+
+
+
 
 // Determine recipe difficulty based on instructions length
 function getDifficulty(instructions) {
