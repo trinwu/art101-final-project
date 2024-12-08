@@ -52,7 +52,7 @@ header h1 {
 .egg {
     width: 80px;
     height: 80px;
-    background: url('../img/egg.png') no-repeat center center;
+    background: url('../img/chicken.png') no-repeat center center;
     background-size: contain;
     margin: 10px;
     cursor: pointer;
