@@ -66,3 +66,6 @@ CREATE TABLE "my_checklist"(
     "duration_minutes" DOUBLE
 );
 success!
+timestamp: 2024-12-09T14:50:32.288143
+ALTER TABLE "my_checklist" ADD "common_name" CHAR(512);
+success!

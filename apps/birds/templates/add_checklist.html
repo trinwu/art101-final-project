@@ -62,13 +62,40 @@
 
         <!-- Checklist Submission Form -->
         <form @submit.prevent="validateAndSubmit">
-            <div class="field">
+            <!-- <div class="field">
                 <label class="label">Species Name</label>
                 <div class="control">
                     <input class="input" type="text" v-model="speciesName" placeholder="Enter species name">
                 </div>
                 <p v-if="errors.speciesName" class="help is-danger">{{ errors.speciesName }}</p>
-            </div>
+            </div> -->
+            <div class="field">
+                <label class="label">Species Name</label>
+                <div class="control">
+                  <input 
+                    class="input" 
+                    type="text" 
+                    v-model="searchQuery"
+                    placeholder="Enter species name" 
+                    @input="fetchSpecies"
+                  >
+                </div>
+                <!-- Dropdown -->
+                <table class="table is-fullwidth">
+                  <thead>
+                    <tr>
+                      <th>Species Name</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="species in filteredSpecies" :key="species.id">
+                      <td>{{ species.COMMON_NAME }}</td>
+                    </tr>
+                  </tbody>
+                </table>
+                <p v-if="errors.speciesName" class="help is-danger">{{ errors.speciesName }}</p>
+              </div>
+              
 
             <div class="field">
                 <label class="label">Latitude</label>
