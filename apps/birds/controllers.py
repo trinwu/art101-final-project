@@ -187,4 +187,25 @@ def submit_checklist():
     except Exception as e:
         db.rollback()
         return dict(status="error", message=str(e))
-    
+
+@action('delete_checklist/<checklist_id>', method=["DELETE"])
+@action.uses(db, auth.user)
+def delete_checklist(checklist_id):
+    """
+    Deletes a checklist from the `my_checklist` table.
+    """
+    try:
+        # Verify the checklist exists
+        checklist = db.my_checklist(checklist_id)
+        if not checklist:
+            return dict(status="error", message="Checklist not found")
+
+        # Delete the checklist
+        db(db.my_checklist.id == checklist_id).delete()
+        db.commit()
+
+        return dict(status="success", message="Checklist deleted successfully")
+    except Exception as e:
+        db.rollback()
+        return dict(status="error", message=f"Error deleting checklist: {str(e)}")
+ 

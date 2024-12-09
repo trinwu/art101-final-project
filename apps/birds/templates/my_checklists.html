@@ -63,16 +63,19 @@
       },
       async deleteChecklist(id) {
         try {
-          await axios.delete(`/delete_checklist/${id}`);
-          alert('Checklist deleted successfully!');
-          this.fetchChecklists();  // Re-fetch the list after deletion
+          const response = await axios.delete(`/birds/delete_checklist/${id}`);
+          if (response.data.status === "success") {
+            this.fetchChecklists(); // Refresh the list without alert
+          } else {
+            console.error(response.data.message); // Log any error
+          }
         } catch (error) {
           console.error('Error deleting checklist:', error);
         }
       },
     },
   });
-  
+
   app.mount('#app');
 </script>
 [[end]]
