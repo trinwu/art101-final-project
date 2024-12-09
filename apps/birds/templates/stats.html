@@ -1,0 +1,111 @@
+[[extend 'layout.html']]
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Statistics</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+    <style>
+        [v-cloak] {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="section" id="app" v-cloak>
+        <h1 class="title"><i class="fa-solid fa-chart-bar"></i> User Statistics</h1>
+
+        <!-- Search Bar for Species -->
+        <div class="field">
+            <label class="label">Search Species</label>
+            <div class="control">
+                <input
+                    class="input"
+                    type="text"
+                    v-model="searchQuery"
+                    placeholder="Type to search species..."
+                />
+            </div>
+        </div>
+
+        <!-- List of Species Seen -->
+        <table class="table is-fullwidth">
+            <thead>
+                <tr>
+                    <th>Species Name</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr v-for="species in filteredSpecies" :key="species.id">
+                    <td>{{ species.name }}</td>
+                    <td>
+                        <button class="button is-small is-info" @click="viewSpeciesDetails(species)">
+                            View Details
+                        </button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- Species Details Visualization -->
+        <div v-if="selectedSpecies" class="box">
+            <h2 class="subtitle">Details for {{ selectedSpecies.name }}</h2>
+
+            <!-- Visualization Placeholder -->
+            <div class="content">
+                <p><strong>Times Observed:</strong> {{ selectedSpecies.timesObserved }}</p>
+                <p><strong>Locations:</strong></p>
+                <div class="map-placeholder">[Map Placeholder]</div>
+            </div>
+        </div>
+
+        <!-- Trend Visualization -->
+        <div class="box">
+            <h2 class="subtitle">Bird-Watching Trends</h2>
+
+            <!--Chart Placeholder-->
+            <div class="chart-placeholder">[Chart Placeholder]</div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/vue@3"></script>
+    <script>
+        const app = Vue.createApp({
+            data() {
+                return {
+                    searchQuery: '',
+                    speciesList: [], //replace with actual data 
+                    filteredSpecies: [],
+                    selectedSpecies: null, //holds the selected species details
+                };
+            },
+            methods: {
+                viewSpeciesDetails(species) {
+                    this.selectedSpecies = species;
+                },
+            },
+            watch: {
+                searchQuery() {
+                    //need to implement search logic for species list here
+                    this.filteredSpecies = this.speciesList.filter(species => 
+                        species.name.toLowerCase().includes(this.searchQuery.toLowerCase())
+                    );
+                },
+            },
+            mounted() {
+                //for testing purpose (replace with API call later)
+                this.speciesList = [
+                    { id: 1, name: 'Sparrow', timesObserved: 5 },
+                    { id: 2, name: 'Eagle', timesObserved: 2 },
+                    { id: 3, name: 'Robin', timesObserved: 7 },
+                ];
+                this.filteredSpecies = this.speciesList;
+            },
+        });
+
+        app.mount('#app');
+    </script>
+</body>
+</html>
