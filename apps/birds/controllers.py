@@ -124,6 +124,15 @@ def get_checklists():
     except Exception as e:
         return dict(error=str(e))
 
+@action('get_my_checklists', method=["GET"])
+@action.uses(db, auth.user)
+def get_checklists():
+    try:
+        checklists = db(db.my_checklist).select().as_list()
+        return dict(checklists=checklists)
+    except Exception as e:
+        return dict(error=str(e))
+
 
 @action('add_checklist')
 @action.uses('add_checklist.html', db, auth)
@@ -162,7 +171,7 @@ def submit_checklist():
             "TIME_OBSERVATIONS_STARTED": data.get("timeObservationsStarted"),
             "DURATION_MINUTES": float(data.get("durationMinutes")),
         }
-        checklist_id = db.checklist.insert(**checklist_data)
+        checklist_id = db.my_checklist.insert(**checklist_data)
 
         # Handle species data
         species = data.get("species", [])

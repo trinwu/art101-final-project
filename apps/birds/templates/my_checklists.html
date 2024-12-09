@@ -55,7 +55,7 @@
     methods: {
       async fetchChecklists() {
         try {
-          const response = await axios.get('/birds/get_checklists');
+          const response = await axios.get('/birds/get_my_checklists');
           this.checklists = response.data.checklists;
         } catch (error) {
           console.error('Error fetching checklists:', error);

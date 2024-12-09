@@ -38,6 +38,17 @@ db.define_table(
     Field('DURATION_MINUTES', 'double')
 )
 
+db.define_table(
+    'my_checklist',
+    Field('SAMPLING_EVENT_IDENTIFIER', 'string'),
+    Field('LATITUDE', 'double'),
+    Field('LONGITUDE', 'double'),
+    Field('OBSERVATION_DATE', 'date'),
+    Field('TIME_OBSERVATIONS_STARTED', 'time'),
+    Field('OBSERVER_ID', 'string'),
+    Field('DURATION_MINUTES', 'double')
+)
+
 ### Data Seeding ###
 def seed_species():
     """Seed the species table from species.csv."""

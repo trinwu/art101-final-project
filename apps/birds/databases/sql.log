@@ -54,3 +54,15 @@ CREATE TABLE "checklist"(
     "duration_minutes" DOUBLE
 );
 success!
+timestamp: 2024-12-09T14:20:40.271337
+CREATE TABLE "my_checklist"(
+    "id" INTEGER PRIMARY KEY AUTOINCREMENT,
+    "sampling_event_identifier" CHAR(512),
+    "latitude" DOUBLE,
+    "longitude" DOUBLE,
+    "observation_date" DATE,
+    "time_observations_started" TIME,
+    "observer_id" CHAR(512),
+    "duration_minutes" DOUBLE
+);
+success!
