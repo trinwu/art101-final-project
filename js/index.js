@@ -185,7 +185,7 @@ function setupFilters() {
         button.addEventListener("click", function () {
             const difficulty = button.dataset.filter;
             loadEggs(); // Refresh eggs
-            popupMessage("Changes made!", "Filtered for " + difficulty + " recipes! Click on an egg!");
+            popupMessage("Changes made!", "Filtered for " + difficulty + " recipes! Click on an Chicken!");
         });
     });
 }
