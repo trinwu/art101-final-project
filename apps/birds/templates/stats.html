@@ -24,6 +24,7 @@
                     class="input"
                     type="text"
                     v-model="searchQuery"
+                    @input="fetchSpecies"
                     placeholder="Type to search species..."
                 />
             </div>
@@ -39,7 +40,7 @@
             </thead>
             <tbody>
                 <tr v-for="species in filteredSpecies" :key="species.id">
-                    <td>{{ species.name }}</td>
+                    <td>{{ species.COMMON_NAME }}</td>
                     <td>
                         <button class="button is-small is-info" @click="viewSpeciesDetails(species)">
                             View Details
@@ -51,7 +52,7 @@
 
         <!-- Species Details Visualization -->
         <div v-if="selectedSpecies" class="box">
-            <h2 class="subtitle">Details for {{ selectedSpecies.name }}</h2>
+            <h2 class="subtitle">Details for {{ selectedSpecies.COMMON_NAME }}</h2>
 
             <!-- Visualization Placeholder -->
             <div class="content">
@@ -71,6 +72,7 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/vue@3"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script>
         const app = Vue.createApp({
             data() {
@@ -85,23 +87,38 @@
                 viewSpeciesDetails(species) {
                     this.selectedSpecies = species;
                 },
-            },
-            watch: {
-                searchQuery() {
-                    //need to implement search logic for species list here
-                    this.filteredSpecies = this.speciesList.filter(species => 
-                        species.name.toLowerCase().includes(this.searchQuery.toLowerCase())
-                    );
+                async fetchSpecies() {
+                    try {
+                        const response = await axios.get('/birds/search_species', {
+                            params: { q: this.searchQuery },
+                        });
+                        this.speciesList = response.data.species;
+                        this.filteredSpecies = this.speciesList;
+                    } catch (error) {
+                        console.error('Error fetching species data:', error);
+                    }
                 },
             },
-            mounted() {
-                //for testing purpose (replace with API call later)
-                this.speciesList = [
-                    { id: 1, name: 'Sparrow', timesObserved: 5 },
-                    { id: 2, name: 'Eagle', timesObserved: 2 },
-                    { id: 3, name: 'Robin', timesObserved: 7 },
-                ];
-                this.filteredSpecies = this.speciesList;
+            // watch: {
+            //     searchQuery() {
+            //         //need to implement search logic for species list here
+            //         this.filteredSpecies = this.speciesList.filter(species => 
+            //             species.name.toLowerCase().includes(this.searchQuery.toLowerCase())
+            //         );
+            //     },
+            // },
+            // mounted() {
+            //     //for testing purpose (replace with API call later)
+            //     this.speciesList = [
+            //         { id: 1, name: 'Sparrow', timesObserved: 5 },
+            //         { id: 2, name: 'Eagle', timesObserved: 2 },
+            //         { id: 3, name: 'Robin', timesObserved: 7 },
+            //     ];
+            //     this.filteredSpecies = this.speciesList;
+            // },
+            created() {
+                // Fetch all species initially
+                this.fetchSpecies();
             },
         });
 
