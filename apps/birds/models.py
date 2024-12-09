@@ -41,6 +41,7 @@ db.define_table(
 db.define_table(
     'my_checklist',
     Field('SAMPLING_EVENT_IDENTIFIER', 'string'),
+    Field('COMMON_NAME', 'string'),
     Field('LATITUDE', 'double'),
     Field('LONGITUDE', 'double'),
     Field('OBSERVATION_DATE', 'date'),

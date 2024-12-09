@@ -63,6 +63,14 @@
         <!-- Checklist Submission Form -->
         <form @submit.prevent="validateAndSubmit">
             <div class="field">
+                <label class="label">Species Name</label>
+                <div class="control">
+                    <input class="input" type="text" v-model="speciesName" placeholder="Enter species name">
+                </div>
+                <p v-if="errors.speciesName" class="help is-danger">{{ errors.speciesName }}</p>
+            </div>
+
+            <div class="field">
                 <label class="label">Latitude</label>
                 <div class="control">
                     <input class="input" type="text" v-model="latitude" placeholder="Enter latitude">
@@ -128,6 +136,7 @@
                     timeObservationsStarted: '',
                     durationMinutes: '',
                     errors: {}, // Object to hold field-specific errors
+                    speciesName: '', 
                 };
             },
             computed: {
@@ -138,6 +147,7 @@
                         !this.observationDate ||
                         !this.timeObservationsStarted ||
                         !this.durationMinutes ||
+                        !this.speciesName.trim() ||
                         !this.filteredSpecies.some(s => s.count > 0)
                     );
                 },
@@ -158,7 +168,6 @@
                         console.error('Error fetching species data:', error);
                     }
                 },
-
                 incrementCount(species) {
                     if (!species.count) species.count = 0;
                     species.count++;
@@ -169,16 +178,18 @@
                     this.observationDate = '';
                     this.timeObservationsStarted = '';
                     this.durationMinutes = '';
+                    this.speciesName = '';
                     this.filteredSpecies = [];
                     this.errors = {};
                 },
                 validateAndSubmit() {
                     if (!this.hasErrors) {
                         this.submitChecklist();
-                    }
+                    } 
                 },
                 async submitChecklist() {
                     const checklist = {
+                        speciesName: this.speciesName,
                         latitude: this.latitude,
                         longitude: this.longitude,
                         observationDate: this.observationDate,

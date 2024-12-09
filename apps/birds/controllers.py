@@ -165,6 +165,7 @@ def submit_checklist():
     try:
         data = request.json
         checklist_data = {
+            "COMMON_NAME": str(data.get("speciesName")),
             "LATITUDE": float(data.get("latitude")),
             "LONGITUDE": float(data.get("longitude")),
             "OBSERVATION_DATE": data.get("observationDate"),
