@@ -23,16 +23,91 @@
       </tr>
     </thead>
     <tbody>
-      <tr v-for="checklist in checklists" :key="checklist.id">
-        <td>{{ checklist.COMMON_NAME }}</td>
-        <td>{{ checklist.LATITUDE }}</td>
-        <td>{{ checklist.LONGITUDE }}</td>
-        <td>{{ checklist.OBSERVATION_DATE }}</td>
-        <td>{{ checklist.TIME_OBSERVATIONS_STARTED }}</td>
-        <td>{{ checklist.DURATION_MINUTES }}</td>
+      <tr v-for="(checklist, index) in checklists" :key="checklist.id">
         <td>
-          <a :href="`/edit_checklist/${checklist.id}`" class="button is-small is-info">Edit</a>
-          <button @click="deleteChecklist(checklist.id)" class="button is-small is-danger">Delete</button>
+          <input
+            v-if="checklist.isEditing"
+            class="input is-small"
+            v-model="checklist.COMMON_NAME"
+            type="text"
+          />
+          <span v-else>{{ checklist.COMMON_NAME }}</span>
+        </td>
+        <td>
+          <input
+            v-if="checklist.isEditing"
+            class="input is-small"
+            v-model="checklist.LATITUDE"
+            type="number"
+            step="any"
+          />
+          <span v-else>{{ checklist.LATITUDE }}</span>
+        </td>
+        <td>
+          <input
+            v-if="checklist.isEditing"
+            class="input is-small"
+            v-model="checklist.LONGITUDE"
+            type="number"
+            step="any"
+          />
+          <span v-else>{{ checklist.LONGITUDE }}</span>
+        </td>
+        <td>
+          <input
+            v-if="checklist.isEditing"
+            class="input is-small"
+            v-model="checklist.OBSERVATION_DATE"
+            type="date"
+          />
+          <span v-else>{{ checklist.OBSERVATION_DATE }}</span>
+        </td>
+        <td>
+          <input
+            v-if="checklist.isEditing"
+            class="input is-small"
+            v-model="checklist.TIME_OBSERVATIONS_STARTED"
+            type="time"
+          />
+          <span v-else>{{ checklist.TIME_OBSERVATIONS_STARTED }}</span>
+        </td>
+        <td>
+          <input
+            v-if="checklist.isEditing"
+            class="input is-small"
+            v-model="checklist.DURATION_MINUTES"
+            type="number"
+          />
+          <span v-else>{{ checklist.DURATION_MINUTES }}</span>
+        </td>
+        <td>
+          <button
+            v-if="checklist.isEditing"
+            @click="saveChecklist(index)"
+            class="button is-small is-success"
+          >
+            Save
+          </button>
+          <button
+            v-if="checklist.isEditing"
+            @click="cancelEdit(index)"
+            class="button is-small is-light"
+          >
+            Cancel
+          </button>
+          <button
+            v-else
+            @click="editChecklist(index)"
+            class="button is-small is-info"
+          >
+            Edit
+          </button>
+          <button
+            @click="deleteChecklist(checklist.id)"
+            class="button is-small is-danger"
+          >
+            Delete
+          </button>
         </td>
       </tr>
     </tbody>
@@ -56,15 +131,46 @@
       async fetchChecklists() {
         try {
           const response = await axios.get('/birds/get_my_checklists');
-          this.checklists = response.data.checklists;
+          this.checklists = response.data.checklists.map((checklist) => ({
+            ...checklist,
+            isEditing: false, // Add editing state
+          }));
         } catch (error) {
           console.error('Error fetching checklists:', error);
+        }
+      },
+      editChecklist(index) {
+        this.checklists[index].isEditing = true; // Enable editing mode
+      },
+      cancelEdit(index) {
+        this.fetchChecklists(); // Reset changes by refetching
+        this.checklists[index].isEditing = false; // Exit editing mode
+      },
+      async saveChecklist(index) {
+        try {
+          const checklist = this.checklists[index];
+          const response = await axios.post(`/birds/edit_checklist/${checklist.id}`, {
+            COMMON_NAME: checklist.COMMON_NAME,
+            LATITUDE: checklist.LATITUDE,
+            LONGITUDE: checklist.LONGITUDE,
+            OBSERVATION_DATE: checklist.OBSERVATION_DATE,
+            TIME_OBSERVATIONS_STARTED: checklist.TIME_OBSERVATIONS_STARTED,
+            DURATION_MINUTES: checklist.DURATION_MINUTES,
+          });
+          if (response.data.status === 'success') {
+            checklist.isEditing = false; // Exit editing mode
+            this.fetchChecklists(); // Refresh the list
+          } else {
+            console.error(response.data.message);
+          }
+        } catch (error) {
+          console.error('Error saving checklist:', error);
         }
       },
       async deleteChecklist(id) {
         try {
           const response = await axios.delete(`/birds/delete_checklist/${id}`);
-          if (response.data.status === "success") {
+          if (response.data.status === 'success') {
             this.fetchChecklists(); // Refresh the list without alert
           } else {
             console.error(response.data.message); // Log any error

@@ -209,3 +209,34 @@ def delete_checklist(checklist_id):
         db.rollback()
         return dict(status="error", message=f"Error deleting checklist: {str(e)}")
  
+@action('edit_checklist/<checklist_id>', method=["POST"])
+@action.uses(db, auth.user)
+def edit_checklist(checklist_id):
+    """
+    Update a checklist entry in the `my_checklist` table.
+    """
+    try:
+        # Fetch the checklist by ID
+        checklist = db.my_checklist(checklist_id)
+        if not checklist:
+            return dict(status="error", message="Checklist not found")
+
+        # Get data from the POST request
+        data = request.json
+        checklist_data = {
+            "COMMON_NAME": data.get("COMMON_NAME"),
+            "LATITUDE": float(data.get("LATITUDE")),
+            "LONGITUDE": float(data.get("LONGITUDE")),
+            "OBSERVATION_DATE": data.get("OBSERVATION_DATE"),
+            "TIME_OBSERVATIONS_STARTED": data.get("TIME_OBSERVATIONS_STARTED"),
+            "DURATION_MINUTES": float(data.get("DURATION_MINUTES")),
+        }
+
+        # Update the checklist in the database
+        db(db.my_checklist.id == checklist_id).update(**checklist_data)
+        db.commit()
+
+        return dict(status="success", message="Checklist updated successfully")
+    except Exception as e:
+        db.rollback()
+        return dict(status="error", message=f"Error updating checklist: {str(e)}")
