@@ -17,6 +17,9 @@ async function loadEggs() {
             egg.addEventListener("click", function () {
                 const recipe = getRandomRecipe();
                 popupMessage(recipe.name, recipe.instructions, recipe.ingredients);
+                const clickSound = document.getElementById("click-sound");
+                clickSound.currentTime = 0; // Reset sound to start
+                clickSound.play();
             });
             eggContainer.appendChild(egg);
         }
