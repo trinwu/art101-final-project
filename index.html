@@ -1,37 +1,38 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-	<!-- This title is used for tabs and bookmarks -->
-	<title>Whats Cluckin? Chicken Recipe Generator</title>
+    <!-- Title for tabs and bookmarks -->
+    <title>What's Cluckin? Chicken Recipe Generator</title>
 
-	<!-- Use UTF character set, a good idea with any webpage -->
-  	<meta charset="UTF-8" />
-	<!-- Set viewport so page remains consistently scaled w narrow devices -->
-  	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- Meta tags for character set and viewport -->
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-	<!-- CSS file for any special styling of this particular page -->
+    <!-- Link to the external CSS file -->
     <link rel="stylesheet" type="text/css" href="css/style.css">
 
-	<!-- load jQuery library to make javascript easier (must be above our lab js)-->
+    <!-- Load the jQuery library -->
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 
-	<!-- Link to javascript file - DEFER waits until all elements are rendered -->
-    <script src="js/index.js" DEFER></script>
+    <!-- Link to JavaScript file (DEFER ensures it loads after content) -->
+    <script src="js/index.js" defer></script>
 
-	<!-- Poppins font -->
-	<link rel="preconnect" href="https://fonts.googleapis.com">
-	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
-	<link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,600;0,700;1,100&amp;display=swap" rel="stylesheet">
-
+    <!-- Poppins font for styling -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,600;0,700;1,100&display=swap" rel="stylesheet">
 </head>
 <body>
+    <!-- Overlay Section for Popup -->
     <section class="overlay">
         <div class="popup">
             <h2 id="recipeName"></h2>
-            <p id="recipeOutput"></p>
+            <div id="recipeOutput"></div>
             <button id="return" class="return-button">Return</button>
         </div>
     </section>
+
+    <!-- Header Section -->
     <header>
         <h1>What's Cluckin? Chicken Recipe Generator</h1>
         <div id="filters">
@@ -41,14 +42,16 @@
             <button class="filter-button" data-filter="all">All</button>
         </div>
         <audio id="click-sound" src="sound/clucking-sound-mp3.mp3"></audio>
-
-        <script src="js/index.js"></script>
     </header>
+
+    <!-- Main Section for Egg Container -->
     <main id="egg-container">
-        <!-- Egg buttons will be dynamically generated -->
+        <!-- Eggs will be dynamically generated here -->
     </main>
+
+    <!-- Footer Section -->
     <footer>
-        <p>Click any Chicken to get a random recipe!</p>
+        <p>Click any chicken to get a random recipe!</p>
     </footer>
 </body>
 </html>
