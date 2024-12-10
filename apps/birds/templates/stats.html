@@ -14,7 +14,14 @@
 </head>
 <body>
     <div class="section" id="app" v-cloak>
-        <h1 class="title"><i class="fa-solid fa-chart-bar"></i> User Statistics</h1>
+        <div class="is-flex is-justify-content-space-between is-align-items-center">
+            <h1 class="title">
+                <i class="fa-solid fa-chart-bar"></i> User Statistics
+            </h1>
+            <a href="/birds/index" class="button is-small is-light">
+                Back to Home
+            </a>
+        </div>
 
         <!-- Search Bar for Species -->
         <div class="field">
@@ -89,7 +96,7 @@
                 },
                 async fetchSpecies() {
                     try {
-                        const response = await axios.get('/birds/search_species', {
+                        const response = await axios.get('/birds/search_my_checklist', {
                             params: { q: this.searchQuery },
                         });
                         this.speciesList = response.data.species;

@@ -240,3 +240,19 @@ def edit_checklist(checklist_id):
     except Exception as e:
         db.rollback()
         return dict(status="error", message=f"Error updating checklist: {str(e)}")
+
+
+@action("search_my_checklist", method=["GET"])
+@action.uses(db, auth.user)
+def search_my_checklist():
+    query = request.params.get("q", "").strip().lower()  # Get the search query and strip whitespace
+    species = []
+    if query:  # Only perform search if query is not empty
+        # Filter and remove duplicates by grouping or selecting distinct names
+        species = db(
+            db.my_checklist.COMMON_NAME.contains(query)
+        ).select(
+            db.my_checklist.COMMON_NAME, 
+            distinct=True
+        ).as_list()
+    return dict(species=species)
