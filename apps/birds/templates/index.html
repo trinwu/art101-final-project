@@ -15,24 +15,6 @@
             width: 100%;
             border-radius: 5px;
         }
-
-        /* Dark Mode */
-        .dark-mode {
-            background-color: #121212;
-            color: #f4f6f8;
-        }
-
-        .dark-mode #map {
-            background-color: #2c2c2c;
-        }
-
-        .theme-toggle {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 1000;
-        }
-        
     </style>
 </head>
 <body>
@@ -43,16 +25,17 @@
             <i class="fas fa-dove fa-xs"></i> <!-- Bird icon -->
             <i class="fas fa-binoculars fa-xs"></i> <!-- Binoculars icon -->
         </h1>
-            <div class="field is-grouped is-grouped-centered">
-                <div class="control">
-                    <div class="select is-info"></div>
-                        <select id="species-select">
-                            <option value="">Select a Species</option>
-                             <!-- Dynamically populated species -->
-                         </select>
-                    </div>
+        <div class="field is-grouped is-grouped-centered">
+            <div class="control">
+                <div class="select">
+                    <select id="species-select">
+                        <option value="">Select a Species</option>
+                        <!-- Dynamically populated species -->
+                    </select>
                 </div>
             </div>
+        </div>
+        
 
         <div class="box">
                 <div id="map"></div>
@@ -70,8 +53,6 @@
 
     </div>
 </section>
-
-    <button id="theme-toggle" class="button is-small is-dark theme-toggle">🌙</button>
 
     <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
     <script src="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.js"></script>
@@ -189,12 +170,6 @@
                 drawnItems.clearLayers();
                 checklistButton.href = '#';
                 checklistButton.setAttribute('disabled', true);
-            });
-
-            // Theme toggle functionality
-            themeToggleButton.addEventListener('click', () => {
-                document.body.classList.toggle('dark-mode');
-                themeToggleButton.textContent = document.body.classList.contains('dark-mode') ? '🌞' : '🌙';
             });
 
             // Populate species dropdown on load
