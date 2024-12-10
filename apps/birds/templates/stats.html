@@ -10,12 +10,26 @@
         [v-cloak] {
             display: none;
         }
+        .button.is-grey {
+            background-color: #e0e0e0;
+            color: #333;
+        }
+        .button.is-grey:hover {
+            background-color: #d4d4d4;
+        }
+        .spaced-line {
+            margin-bottom: 1.5rem;
+        }
+        .date-buttons {
+            margin-top: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
     <div class="section" id="app" v-cloak>
-        <div class="is-flex is-justify-content-space-between is-align-items-center">
+        <div class="is-flex is-justify-content-space-between is-align-items-center spaced-line">
             <h1 class="title">
                 <i class="fa-solid fa-chart-bar"></i> User Statistics
             </h1>
@@ -25,7 +39,7 @@
         </div>
 
         <!-- Search Bar for Species -->
-        <div class="field">
+        <div class="field spaced-line">
             <label class="label">Search Species</label>
             <div class="control">
                 <input
@@ -39,7 +53,7 @@
         </div>
 
         <!-- List of Species Seen -->
-        <table class="table is-fullwidth">
+        <table class="table is-fullwidth spaced-line">
             <thead>
                 <tr>
                     <th>Species Name</th>
@@ -59,10 +73,25 @@
         </table>
 
         <!-- Species Details Visualization -->
-        <div v-if="selectedSpecies" class="box">
+        <div v-if="selectedSpecies" class="box spaced-line">
             <h2 class="subtitle">Details for {{ selectedSpecies.COMMON_NAME }}</h2>
 
-            <!-- Visualization Placeholder -->
+            <!-- Dates Observed as Buttons -->
+            <div class="date-buttons">
+                <p><strong>Dates Observed:</strong></p>
+                <div class="buttons">
+                    <button
+                        v-for="(date, index) in selectedSpecies.datesObserved"
+                        :key="index"
+                        class="button is-small is-grey"
+                        @click="onDateClick(date)"
+                    >
+                        {{ date }}
+                    </button>
+                </div>
+            </div>
+
+            <!-- Additional Visualization -->
             <div class="content">
                 <p><strong>Times Observed:</strong> {{ selectedSpecies.timesObserved }}</p>
                 <p><strong>Locations:</strong></p>
@@ -73,8 +102,6 @@
         <!-- Trend Visualization -->
         <div class="box">
             <h2 class="subtitle">Bird-Watching Trends</h2>
-
-            <!--Chart Placeholder-->
             <!-- <div class="chart-placeholder">[Chart Placeholder]</div> -->
             <canvas id="speciesChart" width="400" height="200"></canvas>
         </div>
@@ -87,17 +114,14 @@
             data() {
                 return {
                     searchQuery: '',
-                    speciesList: [], //replace with actual data 
+                    speciesList: [], 
                     filteredSpecies: [],
-                    selectedSpecies: null, //holds the selected species details
+                    selectedSpecies: null, 
+                    speciesChart: null,
                     speciesChart: null,
                 };
             },
             methods: {
-                viewSpeciesDetails(species) {
-                    this.selectedSpecies = species;
-                    this.renderChart();
-                },
                 async fetchSpecies() {
                     try {
                         const response = await axios.get('/birds/search_my_checklist', {
@@ -109,7 +133,26 @@
                         console.error('Error fetching species data:', error);
                     }
                 },
-
+                async viewSpeciesDetails(species) {
+                    try {
+                        // Fetch observation details for the selected species
+                        const response = await axios.get('/birds/get_species_details', {
+                            params: { common_name: species.COMMON_NAME },
+                        });
+                        this.selectedSpecies = {
+                            ...species,
+                            datesObserved: response.data.datesObserved || [],
+                            timesObserved: response.data.timesObserved || 0,
+                        };
+                        this.renderChart();
+                    } catch (error) {
+                        console.error('Error fetching species details:', error);
+                    }
+                },
+                onDateClick(date) {
+                    alert(`You clicked on the date: ${date}`);
+                    // Add additional logic for date click handling
+                },
                 renderChart() {
                 if (this.speciesChart) {
                     this.speciesChart.destroy();

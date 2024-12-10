@@ -256,3 +256,19 @@ def search_my_checklist():
             distinct=True
         ).as_list()
     return dict(species=species)
+
+@action("get_species_details", method=["GET"])
+@action.uses(db, auth.user)
+def get_species_details():
+    common_name = request.params.get("common_name", "").strip()
+    if not common_name:
+        return dict(datesObserved=[], timesObserved=0)
+    
+    checklists = db(db.my_checklist.COMMON_NAME == common_name).select(
+        db.my_checklist.OBSERVATION_DATE
+    )
+    dates_observed = [str(row.OBSERVATION_DATE) for row in checklists]
+    return dict(
+        datesObserved=list(set(dates_observed)),  # Unique dates
+        timesObserved=len(dates_observed)  # Total observations
+    )
