@@ -8,19 +8,11 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         :root {
-            /* Light Mode Colors */
             --bg-color-light: #f4f6f8;
             --text-color-light: #333;
             --map-bg-light: white;
             --button-bg-light: #4CAF50;
             --button-bg-hover-light: #45a049;
-
-            /* Dark Mode Colors */
-            --bg-color-dark: #121212;
-            --text-color-dark: #f4f6f8;
-            --map-bg-dark: #2c2c2c;
-            --button-bg-dark: #2196F3;
-            --button-bg-hover-dark: #1E88E5;
         }
 
         body {
@@ -30,10 +22,10 @@
             display: flex;
             justify-content: center;
             align-items: center;
+            flex-direction: column;
             min-height: 100vh;
             background-color: var(--bg-color-light);
             color: var(--text-color-light);
-            transition: all 0.3s ease;
         }
 
         .container {
@@ -45,7 +37,6 @@
         h1 {
             font-size: 2.5rem;
             margin-bottom: 20px;
-            color: var(--text-color-light);
         }
 
         .map-container {
@@ -53,20 +44,7 @@
             border-radius: 10px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             padding: 20px;
-            margin-bottom: 20px;
-            transition: background-color 0.3s ease;
-        }
-
-        .controls {
-            display: flex;
-            justify-content: center;
-            margin-bottom: 15px;
-        }
-
-        .controls select, .controls button {
-            margin: 0 10px;
-            padding: 10px;
-            border-radius: 5px;
+            margin-bottom: 10px;
         }
 
         #map {
@@ -75,61 +53,51 @@
             border-radius: 10px;
         }
 
+        .control-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .control-button {
+            padding: 10px 20px;
+            background-color: #ff5722;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+        }
+
+        .control-button:hover {
+            background-color: #e64a19;
+            transform: scale(1.05);
+        }
+
         .nav-buttons {
             display: flex;
             justify-content: center;
             gap: 20px;
+            margin-top: 20px;
+            margin-bottom: 50px; /* Added extra space here */
         }
 
         .nav-button {
-            display: inline-block;
             padding: 15px 25px;
             background-color: var(--button-bg-light);
             color: white;
             text-decoration: none;
             border-radius: 5px;
             transition: background-color 0.3s ease, transform 0.3s ease;
+            pointer-events: none;
+            opacity: 0.5;
         }
 
-        .nav-button:hover {
-            background-color: var(--button-bg-hover-light);
-            transform: scale(1.05);
-        }
-
-        .theme-toggle {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background-color: #f1f1f1;
-            border: none;
-            border-radius: 5px;
-            padding: 10px;
-            cursor: pointer;
-            font-size: 1.2rem;
-        }
-
-        /* Dark Mode Styles */
-        body.dark-mode {
-            background-color: var(--bg-color-dark);
-            color: var(--text-color-dark);
-        }
-
-        .map-container.dark-mode {
-            background-color: var(--map-bg-dark);
-        }
-
-        .nav-button.dark-mode {
-            background-color: var(--button-bg-dark);
-        }
-
-        .nav-button.dark-mode:hover {
-            background-color: var(--button-bg-hover-dark);
-        }
-
-        .controls select.dark-mode, .controls button.dark-mode {
-            background-color: var(--map-bg-dark);
-            color: var(--text-color-dark);
-            border: 1px solid #333;
+        .nav-button.enabled {
+            pointer-events: auto;
+            opacity: 1;
         }
     </style>
 </head>
@@ -138,153 +106,99 @@
         <h1><i class="fa-solid fa-dove"></i> Bird Watcher</h1>
 
         <div class="map-container">
-            <div class="controls">
-                <select id="species-select">
-                    <option value="">All Species</option>
-                    <!-- Species will be populated dynamically -->
-                </select>
-                <button id="region-stats-btn">Statistics on Region</button>
-            </div>
-
             <div id="map"></div>
         </div>
 
-        <div class="nav-buttons">
-            <a href="/birds/add_checklist" class="nav-button">Enter Checklist</a>
-            <a href="/birds/my_checklists" class="nav-button">My Checklists</a> 
-            <a href="/birds/stats" class="nav-button">My Birding Stats</a>
-            
+        <div class="control-buttons">
+            <button id="clear-coordinates" class="control-button">Clear Coordinates</button>
         </div>
-        
-    </div>
 
-    <button class="theme-toggle" id="theme-toggle">🌙</button>
+        <div class="nav-buttons">
+            <a id="checklist-button" href="#" class="nav-button">Enter Checklist</a>
+            <a href="/birds/stats" class="nav-button enabled">My Birding Stats</a>
+            <a href="/birds/my_checklists" class="nav-button enabled">My Checklists</a>
+        </div>
+    </div>
 
     <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
     <script src="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            // Configuration and Constants
-            const SPECIES_LIST = [
-                { id: 'sparrow', name: 'Sparrow' },
-                { id: 'eagle', name: 'Eagle' },
-                { id: 'pigeon', name: 'Pigeon' },
-                { id: 'robin', name: 'Robin' }
-            ];
+            const checklistButton = document.getElementById('checklist-button');
+            const clearCoordinatesButton = document.getElementById('clear-coordinates');
+            let selectedMarker = null;
+            let drawnItems = new L.FeatureGroup();
 
-            const themeToggleButton = document.getElementById('theme-toggle');
+            // Initialize map
+            const map = L.map('map').setView([36.9741, -122.0308], 13);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; OpenStreetMap contributors',
+                maxZoom: 19,
+            }).addTo(map);
 
-            // DOM Element References
-            const speciesSelect = document.getElementById('species-select');
-            const regionStatsBtn = document.getElementById('region-stats-btn');
+            // Add feature group for drawings
+            map.addLayer(drawnItems);
 
-            // Initialize Species Dropdown
-            function populateSpeciesDropdown() {
-                SPECIES_LIST.forEach(species => {
-                    const option = document.createElement('option');
-                    option.value = species.id;
-                    option.textContent = species.name;
-                    speciesSelect.appendChild(option);
-                });
-            }
+            // Enable point selection
+            map.on('click', (e) => {
+                const { lat, lng } = e.latlng;
 
-            // Map Initialization
-            function initializeMap() {
-                // Create map centered on Santa Cruz, CA
-                const map = L.map('map').setView([36.9741, -122.0308], 13);
+                // Remove existing marker
+                if (selectedMarker) {
+                    map.removeLayer(selectedMarker);
+                }
 
-                // Add OpenStreetMap tile layer
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-                    maxZoom: 19
-                }).addTo(map);
+                // Add new marker
+                selectedMarker = L.marker([lat, lng]).addTo(map);
 
-                // Initialize feature group for drawn items
-                const drawnItems = new L.FeatureGroup();
-                map.addLayer(drawnItems);
+                // Update checklist button
+                checklistButton.href = `/birds/add_checklist?lat=${lat}&lng=${lng}`;
+                checklistButton.classList.add('enabled');
+            });
 
-                // Configure drawing controls
-                const drawControl = new L.Control.Draw({
-                    draw: {
-                        polygon: false,
-                        circle: false,
-                        marker: false,
-                        polyline: false,
-                        circlemarker: false,
-                        rectangle: {
-                            shapeOptions: {
-                                color: 'red'
-                            }
-                        }
+            // Initialize drawing controls
+            const drawControl = new L.Control.Draw({
+                draw: {
+                    polygon: false,
+                    circle: false,
+                    marker: false,
+                    polyline: false,
+                    circlemarker: false,
+                    rectangle: {
+                        shapeOptions: {
+                            color: 'blue',
+                        },
                     },
-                    edit: {
-                        featureGroup: drawnItems
-                    }
-                });
-                map.addControl(drawControl);
+                },
+                edit: {
+                    featureGroup: drawnItems,
+                },
+            });
+            map.addControl(drawControl);
 
-                // Handle rectangle drawing
-                map.on(L.Draw.Event.CREATED, function (e) {
-                    const layer = e.layer;
-                    drawnItems.clearLayers(); // Clear previous rectangles
-                    drawnItems.addLayer(layer);
-                });
+            // Handle rectangle drawing
+            map.on(L.Draw.Event.CREATED, (e) => {
+                const layer = e.layer;
 
-                return { map, drawnItems };
-            }
+                // Clear existing layers and add new rectangle
+                drawnItems.clearLayers();
+                drawnItems.addLayer(layer);
 
-            // Event Handlers
-            function setupEventHandlers(map, drawnItems) {
-                // Region stats button handler
-                regionStatsBtn.addEventListener('click', () => {
-                    if (drawnItems.getLayers().length > 0) {
-                        const selectedRegion = drawnItems.getLayers()[0].getBounds();
-                        const regionStats = {
-                            northEast: selectedRegion.getNorthEast(),
-                            southWest: selectedRegion.getSouthWest()
-                        };
-                        
-                        console.log('Selected Region Stats:', regionStats);
-                        alert(`Region Selected: ${JSON.stringify(regionStats)}`);
-                    } else {
-                        alert('Please draw a region on the map first.');
-                    }
-                });
+                // Get bounds and log them
+                const bounds = layer.getBounds();
+                console.log('Selected Region Bounds:', bounds);
+            });
 
-                // Species selection handler
-                speciesSelect.addEventListener('change', (event) => {
-                    const selectedSpecies = event.target.value;
-                    console.log(`Selected Species: ${selectedSpecies || 'All Species'}`);
-                    
-                    // Placeholder: Update map with species-specific data
-                    // Future implementation would fetch and display species-specific heatmap
-                });
-            }
-
-            // Dark/Light Mode Toggle
-            function toggleTheme() {
-                document.body.classList.toggle('dark-mode');
-                const navButtons = document.querySelectorAll('.nav-button');
-                const controls = document.querySelectorAll('.controls select, .controls button');
-                
-                navButtons.forEach(btn => btn.classList.toggle('dark-mode'));
-                controls.forEach(ctrl => ctrl.classList.toggle('dark-mode'));
-                
-                themeToggleButton.textContent = document.body.classList.contains('dark-mode') ? '🌞' : '🌙';
-            }
-
-            // Main Initialization
-            function init() {
-                populateSpeciesDropdown();
-                const { map, drawnItems } = initializeMap();
-                setupEventHandlers(map, drawnItems);
-            }
-
-            // Initialize theme and set event listener
-            themeToggleButton.addEventListener('click', toggleTheme);
-
-            // Start the application
-            init();
+            // Clear coordinates functionality
+            clearCoordinatesButton.addEventListener('click', () => {
+                if (selectedMarker) {
+                    map.removeLayer(selectedMarker);
+                    selectedMarker = null;
+                }
+                drawnItems.clearLayers();
+                checklistButton.href = '#';
+                checklistButton.classList.remove('enabled');
+            });
         });
     </script>
 </body>

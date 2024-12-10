@@ -70,38 +70,16 @@
                 <p v-if="errors.speciesName" class="help is-danger">{{ errors.speciesName }}</p>
             </div>
 
-
-            <!-- <div class="field">
-                <label class="label">Species Name</label>
-                <div class="control">
-                  <input 
-                    class="input" 
-                    type="text" 
-                    v-model="searchQuery"
-                    placeholder="Enter species name" 
-                    @input="fetchSpecies"
-                  >
-                </div>
-                <table class="table is-fullwidth">
-                  <thead>
-                    <tr>
-                      <th>Species Name</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr v-for="species in filteredSpecies" :key="species.id">
-                      <td>{{ species.COMMON_NAME }}</td>
-                    </tr>
-                  </tbody>
-                </table>
-                <p v-if="errors.speciesName" class="help is-danger">{{ errors.speciesName }}</p>
-              </div>
-               -->
-
             <div class="field">
                 <label class="label">Latitude</label>
                 <div class="control">
-                    <input class="input" type="text" v-model="latitude" placeholder="Enter latitude">
+                    <input
+                        class="input"
+                        type="text"
+                        v-model="latitude"
+                        readonly
+                        placeholder="Latitude will be auto-filled"
+                    >
                 </div>
                 <p v-if="errors.latitude" class="help is-danger">{{ errors.latitude }}</p>
             </div>
@@ -109,7 +87,13 @@
             <div class="field">
                 <label class="label">Longitude</label>
                 <div class="control">
-                    <input class="input" type="text" v-model="longitude" placeholder="Enter longitude">
+                    <input
+                        class="input"
+                        type="text"
+                        v-model="longitude"
+                        readonly
+                        placeholder="Longitude will be auto-filled"
+                    >
                 </div>
                 <p v-if="errors.longitude" class="help is-danger">{{ errors.longitude }}</p>
             </div>
@@ -186,10 +170,9 @@
                         const response = await axios.get('/birds/search_species', {
                             params: { q: this.searchQuery },
                         });
-                        console.log("Response from search_species:", response.data);
                         this.speciesList = response.data.species.map(s => ({
                             ...s,
-                            count: 0, // Initialize count for each species
+                            count: 0,
                         }));
                         this.filteredSpecies = this.speciesList;
                     } catch (error) {
@@ -234,6 +217,12 @@
                         console.error('Error submitting checklist:', error);
                     }
                 },
+            },
+            mounted() {
+                // Get latitude and longitude from URL
+                const params = new URLSearchParams(window.location.search);
+                this.latitude = params.get('lat') || '';
+                this.longitude = params.get('lng') || '';
             },
         });
 
