@@ -118,7 +118,6 @@
                     filteredSpecies: [],
                     selectedSpecies: null, 
                     speciesChart: null,
-                    speciesChart: null,
                 };
             },
             methods: {
@@ -154,35 +153,44 @@
                     // Add additional logic for date click handling
                 },
                 renderChart() {
-                if (this.speciesChart) {
-                    this.speciesChart.destroy();
-                 }
-
-                const ctx = document.getElementById('speciesChart');
-                if (!ctx) return;
-                this.speciesChart = new Chart(ctx, {
-                    type: 'bar',
-                    data: {
-                        labels: ['Species 1', 'Species 2', 'Species 3'],
-                        datasets: [{
-                            label: 'Times Observed',
-                            data: [5, 3, 7],
-                            backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                            borderColor: 'rgba(75, 192, 192, 1)',
-                            borderWidth: 1
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        scales: {
-                            y: {
-                                beginAtZero: true
-                            }    
-                        }
+                    if (!this.selectedSpecies || !this.selectedSpecies.datesObserved || this.selectedSpecies.datesObserved.length === 0) {
+                        console.warn('No dates observed to render chart');
+                        return; // Exit if there's no data to display
                     }
-                });
-            }
-        },
+
+                    const dates = this.selectedSpecies.datesObserved;
+                    const timesObserved = dates.map(date => this.selectedSpecies.timesObserved); // Assuming `timesObserved` is same for each date
+
+                    if (this.speciesChart) {
+                        this.speciesChart.destroy(); // Destroy previous chart if it exists
+                    }
+
+                    const ctx = document.getElementById('speciesChart');
+                    if (!ctx) return; // Exit if canvas is not found
+
+                    this.speciesChart = new Chart(ctx, {
+                        type: 'bar',
+                        data: {
+                            labels: dates,  // Use the actual dates observed
+                            datasets: [{
+                                label: 'Times Observed',
+                                data: timesObserved,  // Times observed for each date
+                                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                                borderColor: 'rgba(75, 192, 192, 1)',
+                                borderWidth: 1
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            scales: {
+                                y: {
+                                    beginAtZero: true
+                                }
+                            }
+                        }
+                    });
+                }
+            },
             mounted() {
                 this.renderChart();
             },
