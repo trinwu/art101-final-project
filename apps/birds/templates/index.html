@@ -31,6 +31,7 @@
             right: 20px;
             z-index: 1000;
         }
+        
     </style>
 </head>
 <body>
@@ -78,23 +79,42 @@
             let selectedMarker = null;
             let drawnItems = new L.FeatureGroup();
 
-            // Initialize species dropdown
-            const speciesList = [
-                { id: 'sparrow', name: 'Sparrow' },
-                { id: 'eagle', name: 'Eagle' },
-                { id: 'pigeon', name: 'Pigeon' },
-                { id: 'robin', name: 'Robin' },
-            ];
+            // // Initialize species dropdown
+            // const speciesList = [
+            //     { id: 'sparrow', name: 'Sparrow' },
+            //     { id: 'eagle', name: 'Eagle' },
+            //     { id: 'pigeon', name: 'Pigeon' },
+            //     { id: 'robin', name: 'Robin' },
+            // ];
 
-            function populateSpeciesDropdown() {
-                speciesList.forEach(species => {
-                    const option = document.createElement('option');
-                    option.value = species.id;
-                    option.textContent = species.name;
-                    speciesSelect.appendChild(option);
-                });
+            // function populateSpeciesDropdown() {
+            //     speciesList.forEach(species => {
+            //         const option = document.createElement('option');
+            //         option.value = species.id;
+            //         option.textContent = species.name;
+            //         speciesSelect.appendChild(option);
+            //     });
+            // }
+            // Fetch species from the backend and populate the dropdown
+        async function fetchAndPopulateSpeciesDropdown() {
+            try {
+                const response = await fetch('/birds/get_species'); 
+                const data = await response.json();
+
+                if (data.species && Array.isArray(data.species)) {
+                    data.species.forEach(species => {
+                        const option = document.createElement('option');
+                        option.value = species.id; 
+                        option.textContent = species.COMMON_NAME; 
+                        speciesSelect.appendChild(option);
+                    });
+                } else {
+                    console.error("No species found");
+                }
+            } catch (error) {
+                console.error('Error fetching species:', error);
             }
-
+        }
             // Initialize map
             const map = L.map('map').setView([36.9741, -122.0308], 13);
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -173,7 +193,9 @@
             });
 
             // Populate species dropdown on load
-            populateSpeciesDropdown();
+            // populateSpeciesDropdown();
+            fetchAndPopulateSpeciesDropdown();
+
         });
     </script>
 </body>
