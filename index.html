@@ -1,57 +1,108 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <!-- Title for tabs and bookmarks -->
     <title>What's Cluckin? Chicken Recipe Generator</title>
-
-    <!-- Meta tags for character set and viewport -->
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-    <!-- Link to the external CSS file -->
     <link rel="stylesheet" type="text/css" href="css/style.css">
-
-    <!-- Load the jQuery library -->
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-
-    <!-- Link to JavaScript file (DEFER ensures it loads after content) -->
     <script src="js/index.js" defer></script>
-
-    <!-- Poppins font for styling -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,600;0,700;1,100&display=swap" rel="stylesheet">
 </head>
 <body>
-    <!-- Overlay Section for Popup -->
-    <section class="overlay">
-        <div class="popup">
-            <h2 id="recipeName"></h2>
-            <div id="recipeOutput"></div>
-            <button id="return" class="return-button">Return</button>
+<!-- Overlay Section for Popup -->
+<section class="overlay">
+    <div class="popup">
+        <h2 id="recipeName"></h2>
+        <div id="recipeOutput"></div>
+        <button id="return" class="return-button">Return</button>
+    </div>
+</section>
+
+<!-- Header Section -->
+
+
+<!-- Main Section with Slot Machine -->
+<main>
+    <div class="container">
+        <header>
+            <h1>What's</h1>
+            <h1>Cluckin?</h1>
+            <h4>Chicken Recipe Generator</h4>
+            <hr>
+            <div id="filters">
+                <button class="filter-button" data-filter="easy">Easy</button>
+                <button class="filter-button" data-filter="medium">Medium</button>
+                <button class="filter-button" data-filter="hard">Hard</button>
+                <button class="filter-button" data-filter="all">All</button>
+            </div>
+            <audio id="click-sound" src="sound/clucking-sound-mp3.mp3"></audio>
+            <audio id="popup-sound" src="sound/minecraft-egg-throw-made-with-Voicemod.mp3"></audio>
+        </header>
+        <div class="slot-container">
+            <div class="arrow">▼</div>
+            <div class="chicken-row">
+                <!-- Initial visible chickens -->
+                <div class="chicken">🐔</div>
+                <div class="chicken">🐤</div>
+                <div class="chicken">🐥</div>
+                <div class="chicken">🐣</div>
+                <div class="chicken">🐓</div>
+                <div class="chicken">🦃</div>
+                <div class="chicken">🍗</div>
+                <div class="chicken">🦢</div>
+                <!-- Extra chickens for spinning (3 sets) -->
+                <div class="chicken">🐔</div>
+                <div class="chicken">🐤</div>
+                <div class="chicken">🐥</div>
+                <div class="chicken">🐣</div>
+                <div class="chicken">🐓</div>
+                <div class="chicken">🦃</div>
+                <div class="chicken">🍗</div>
+                <div class="chicken">🐔</div>
+                <div class="chicken">🐤</div>
+                <div class="chicken">🐥</div>
+                <div class="chicken">🐣</div>
+                <div class="chicken">🍗</div>
+                <div class="chicken">🐓</div>
+                <div class="chicken">🦃</div>
+                <div class="chicken">🍗</div>
+                <div class="chicken">🐔</div>
+                <div class="chicken">🐤</div>
+                <div class="chicken">🐥</div>
+                <div class="chicken">🐣</div>
+                <div class="chicken">🐓</div>
+                <div class="chicken">🐔</div>
+                <div class="chicken">🐤</div>
+                <div class="chicken">🐥</div>
+                <div class="chicken">🐣</div>
+                <div class="chicken">🐓</div>
+                <div class="chicken">🦃</div>
+                <div class="chicken">🍗</div>
+                <div class="chicken">🐔</div>
+                <div class="chicken">🐤</div>
+                <div class="chicken">🐥</div>
+                <div class="chicken">🐣</div>
+                <div class="chicken">🍗</div>
+                <div class="chicken">🐓</div>
+                <div class="chicken">🦃</div>
+                <div class="chicken">🍗</div>
+                <div class="chicken">🐔</div>
+                <div class="chicken">🐤</div>
+                <div class="chicken">🐥</div>
+                <div class="chicken">🐣</div>
+                <div class="chicken">🐓</div>
+            </div>
         </div>
-    </section>
+        <button onclick="spin()" class="spin-button">Generate Recipe!</button>
+    </div>
+</main>
 
-    <!-- Header Section -->
-    <header>
-        <h1>What's Cluckin? Chicken Recipe Generator</h1>
-        <div id="filters">
-            <button class="filter-button" data-filter="easy">Easy</button>
-            <button class="filter-button" data-filter="medium">Medium</button>
-            <button class="filter-button" data-filter="hard">Hard</button>
-            <button class="filter-button" data-filter="all">All</button>
-        </div>
-        <audio id="click-sound" src="sound/clucking-sound-mp3.mp3"></audio>
-    </header>
-
-    <!-- Main Section for Egg Container -->
-    <main id="egg-container">
-        <!-- Eggs will be dynamically generated here -->
-    </main>
-
-    <!-- Footer Section -->
-    <footer>
-        <p>Click any chicken to get a random recipe!</p>
-    </footer>
+<!-- Footer Section -->
+<footer>
+    <p>Click spin to get a random recipe!</p>
+</footer>
 </body>
 </html>

@@ -2,30 +2,19 @@
 const BASE_URL = 'https://www.themealdb.com/api/json/v1/1';
 let mealRecipes = [];
 let activeFilter = "all"; // Default filter
+let isSpinning = false;
 
-// Load eggs dynamically
-async function loadEggs() {
-    const eggContainer = document.getElementById("egg-container");
-    eggContainer.innerHTML = ""; // Clear previous eggs
+// Initialize slot machine elements
+const chickenRow = document.querySelector('.chicken-row');
+const spinButton = document.querySelector('.spin-button');
+const chickenWidth = 250;
+const totalChickens = 10;
+const setWidth = chickenWidth * totalChickens;
 
-    try {
-        await fetchRecipes();
-
-        for (let i = 0; i < 30; i++) {
-            const egg = document.createElement("div");
-            egg.classList.add("egg");
-            egg.addEventListener("click", function () {
-                const recipe = getRandomRecipe();
-                popupMessage(recipe.name, recipe.instructions, recipe.ingredients);
-                const clickSound = document.getElementById("click-sound");
-                clickSound.currentTime = 0;
-                clickSound.play();
-            });
-            eggContainer.appendChild(egg);
-        }
-    } catch (error) {
-        console.error("Error loading recipes:", error);
-    }
+// Disable transitions initially
+if (chickenRow) {
+    chickenRow.style.transition = 'none';
+    chickenRow.style.transform = 'translateX(0)';
 }
 
 // Fetch recipes for "chicken," "chicken breast," and "chicken thighs"
@@ -37,14 +26,14 @@ async function fetchRecipes() {
             return data.meals || [];
         };
 
-        // Fetch recipes for chicken, chicken breast, and chicken thighs
+        // Fetch recipes for different chicken types
         const [chickenMeals, chickenBreastMeals, chickenThighsMeals] = await Promise.all([
             fetchData('chicken'),
             fetchData('chicken_breast'),
             fetchData('chicken_thighs')
         ]);
 
-        // Combine and fetch detailed information for all unique recipes
+        // Combine and fetch detailed information
         const combinedMeals = [...new Map([
             ...chickenMeals,
             ...chickenBreastMeals,
@@ -70,7 +59,7 @@ async function fetchRecipes() {
                     name: mealDetails.strMeal,
                     instructions: mealDetails.strInstructions,
                     ingredients: ingredients,
-                    difficulty: getDifficulty(ingredients.length), // Assign difficulty based on ingredient count
+                    difficulty: getDifficulty(ingredients.length),
                 };
             })
         );
@@ -83,41 +72,40 @@ async function fetchRecipes() {
 
 // Determine difficulty based on the number of ingredients
 function getDifficulty(ingredientCount) {
-    if (ingredientCount <= 9) return "easy"; // 9 ingredients or less
-    if (ingredientCount <= 13) return "medium"; // 10 to 13 ingredients
-    return "hard"; // 14 or more ingredients
+    if (ingredientCount <= 9) return "easy";
+    if (ingredientCount <= 13) return "medium";
+    return "hard";
 }
 
-// Get a random recipe from the filtered pool
+// Get a random recipe
 function getRandomRecipe() {
     if (mealRecipes.length === 0) {
         return { name: "No Recipe Available", instructions: "Please try again later.", ingredients: [] };
     }
 
-    // Filter recipes based on the active filter
     const filteredRecipes = activeFilter === "all"
         ? mealRecipes
         : mealRecipes.filter(recipe => recipe.difficulty === activeFilter);
-
-    console.log(`Filtered Recipes (${filteredRecipes.length}) for filter "${activeFilter}":`, filteredRecipes);
 
     if (filteredRecipes.length === 0) {
         return { name: "No Recipe Available", instructions: "Please try a different filter.", ingredients: [] };
     }
 
-    const recipe = filteredRecipes[Math.floor(Math.random() * filteredRecipes.length)];
-    return recipe;
+    return filteredRecipes[Math.floor(Math.random() * filteredRecipes.length)];
 }
 
-// Show recipe details in a popup
+// Show recipe popup
 function popupMessage(name, recipe, ingredients = []) {
     const recipeTitle = document.getElementById("recipeName");
     const recipeOutput = document.getElementById("recipeOutput");
     const overlay = document.querySelector(".overlay");
+    const popupSound = document.getElementById("popup-sound");
+
 
     const ingredientsHTML = `<div class="ingredients"><h3>Ingredients:</h3><ul>${ingredients.map((ing) => `<li>${ing}</li>`).join('')}</ul></div>`;
     const instructionsHTML = `<div class="instructions"><h3>Instructions:</h3><p>${recipe}</p></div>`;
 
+    popupSound.play();
     recipeTitle.textContent = name;
     recipeOutput.innerHTML = `${ingredientsHTML}${instructionsHTML}`;
     overlay.style.display = "flex";
@@ -128,20 +116,65 @@ function hideMenu() {
     document.querySelector(".overlay").style.display = "none";
 }
 
-// Apply a filter
+// Apply filter
 function applyFilter(filter) {
-    activeFilter = filter; // Update the active filter
-    loadEggs(); // Reload eggs with the updated filter
+    activeFilter = filter;
+    document.querySelectorAll(".filter-button").forEach(btn => {
+        btn.classList.toggle("active", btn.dataset.filter === filter);
+    });
 }
 
-// Attach event listeners for filtering
+// Spin function
+function spin() {
+    if (isSpinning) return;
+
+    // Enable transitions for the spin
+    chickenRow.style.transition = 'transform 2.5s cubic-bezier(0.25, 0.1, 0.25, 1)';
+
+    // Play sound effect
+    const clickSound = document.getElementById("click-sound");
+    clickSound.currentTime = 0;
+    clickSound.play();
+
+    isSpinning = true;
+    spinButton.disabled = true;
+
+    // Calculate random ending position
+    const spins = 2;
+    const randomChicken = Math.floor(Math.random() * totalChickens);
+    const finalDistance = -(setWidth * spins + randomChicken * chickenWidth);
+
+    // Apply the animation
+    chickenRow.style.transform = `translateX(${finalDistance}px)`;
+
+    // Show recipe after animation
+    setTimeout(() => {
+        const recipe = getRandomRecipe();
+        popupMessage(recipe.name, recipe.instructions, recipe.ingredients);
+        isSpinning = false;
+        spinButton.disabled = false;
+
+        // Reset position for next spin
+        setTimeout(() => {
+            chickenRow.style.transition = 'none';
+            chickenRow.style.transform = 'translateX(0)';
+        }, 1000);
+    }, 2500);
+}
+
+// Initialize
+document.addEventListener("DOMContentLoaded", async () => {
+    await fetchRecipes();
+});
+
+// Event listeners
 document.querySelectorAll(".filter-button").forEach(button => {
     button.addEventListener("click", () => applyFilter(button.dataset.filter));
 });
-
-// Initialize the app
-document.addEventListener("DOMContentLoaded", loadEggs);
 document.getElementById("return").addEventListener("click", hideMenu);
 document.addEventListener("keydown", (event) => {
     if (event.key === "Escape") hideMenu();
 });
+
+// Expose spin function globally
+window.spin = spin;
