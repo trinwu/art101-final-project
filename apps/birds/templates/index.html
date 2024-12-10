@@ -63,6 +63,13 @@
             border-radius: 10px;
         }
 
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
         .control-buttons {
             display: flex;
             justify-content: center;
@@ -91,7 +98,7 @@
             justify-content: center;
             gap: 20px;
             margin-top: 20px;
-            margin-bottom: 50px; /* Added extra space here */
+            margin-bottom: 50px;
         }
 
         .nav-button {
@@ -122,33 +129,18 @@
             font-size: 1.2rem;
             z-index: 1000;
         }
-
-        /* Dark Mode Styles */
-        body.dark-mode {
-            background-color: var(--bg-color-dark);
-            color: var(--text-color-dark);
-        }
-
-        .map-container.dark-mode {
-            background-color: var(--map-bg-dark);
-        }
-
-        .nav-button.dark-mode {
-            background-color: var(--button-bg-dark);
-        }
-
-        .nav-button.dark-mode:hover {
-            background-color: var(--button-bg-hover-dark);
-        }
-
-        .control-button.dark-mode {
-            background-color: #e64a19;
-        }
     </style>
 </head>
 <body>
     <div class="container">
         <h1><i class="fa-solid fa-dove"></i> Bird Watcher</h1>
+
+        <div class="controls">
+            <select id="species-select">
+                <option value="">Select a Species</option>
+                <!-- Dynamically populated species -->
+            </select>
+        </div>
 
         <div class="map-container">
             <div id="map"></div>
@@ -171,11 +163,29 @@
     <script src="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
+            const speciesSelect = document.getElementById('species-select');
             const checklistButton = document.getElementById('checklist-button');
             const clearCoordinatesButton = document.getElementById('clear-coordinates');
             const themeToggleButton = document.getElementById('theme-toggle');
             let selectedMarker = null;
             let drawnItems = new L.FeatureGroup();
+
+            // Initialize species dropdown
+            const speciesList = [
+                { id: 'sparrow', name: 'Sparrow' },
+                { id: 'eagle', name: 'Eagle' },
+                { id: 'pigeon', name: 'Pigeon' },
+                { id: 'robin', name: 'Robin' },
+            ];
+
+            function populateSpeciesDropdown() {
+                speciesList.forEach(species => {
+                    const option = document.createElement('option');
+                    option.value = species.id;
+                    option.textContent = species.name;
+                    speciesSelect.appendChild(option);
+                });
+            }
 
             // Initialize map
             const map = L.map('map').setView([36.9741, -122.0308], 13);
@@ -251,16 +261,12 @@
             // Theme toggle functionality
             themeToggleButton.addEventListener('click', () => {
                 document.body.classList.toggle('dark-mode');
-                const navButtons = document.querySelectorAll('.nav-button');
-                const controlButtons = document.querySelectorAll('.control-button');
-
-                navButtons.forEach(btn => btn.classList.toggle('dark-mode'));
-                controlButtons.forEach(btn => btn.classList.toggle('dark-mode'));
-
                 themeToggleButton.textContent = document.body.classList.contains('dark-mode') ? '🌞' : '🌙';
             });
+
+            // Populate species dropdown on load
+            populateSpeciesDropdown();
         });
     </script>
 </body>
 </html>
-
