@@ -132,3 +132,42 @@ footer p {
     line-height: 1.5;
     color: #2a2a2a;
 }
+
+/* Filter Buttons */
+.filter-button {
+    background-color: #f4a261; /* Primary button color */
+    border: none;
+    border-radius: 5px;
+    color: white;
+    padding: 10px 20px;
+    margin: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Add slight shadow */
+}
+
+.filter-button:hover {
+    background-color: #e76f51; /* Hover color */
+    transform: scale(1.05); /* Slight scaling on hover */
+    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15); /* Enhance shadow on hover */
+}
+
+/* Active Filter Button Styling */
+.filter-button.active {
+    background-color: #2a9d8f; /* Distinct active color */
+    color: white;
+    border: 2px solid #264653; /* Add contrast border */
+    font-weight: bold; /* Make text bold */
+    transform: scale(1.05); /* Keep slightly larger for emphasis */
+    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2); /* Enhanced shadow for active state */
+}
+
+/* Adjust spacing for filter container */
+#filters {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 15px 0;
+    gap: 10px; /* Space between buttons */
+}
