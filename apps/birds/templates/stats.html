@@ -11,6 +11,7 @@
             display: none;
         }
     </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
     <div class="section" id="app" v-cloak>
@@ -74,7 +75,8 @@
             <h2 class="subtitle">Bird-Watching Trends</h2>
 
             <!--Chart Placeholder-->
-            <div class="chart-placeholder">[Chart Placeholder]</div>
+            <!-- <div class="chart-placeholder">[Chart Placeholder]</div> -->
+            <canvas id="speciesChart" width="400" height="200"></canvas>
         </div>
     </div>
 
@@ -88,11 +90,13 @@
                     speciesList: [], //replace with actual data 
                     filteredSpecies: [],
                     selectedSpecies: null, //holds the selected species details
+                    speciesChart: null,
                 };
             },
             methods: {
                 viewSpeciesDetails(species) {
                     this.selectedSpecies = species;
+                    this.renderChart();
                 },
                 async fetchSpecies() {
                     try {
@@ -105,24 +109,40 @@
                         console.error('Error fetching species data:', error);
                     }
                 },
+
+                renderChart() {
+                if (this.speciesChart) {
+                    this.speciesChart.destroy();
+                 }
+
+                const ctx = document.getElementById('speciesChart');
+                if (!ctx) return;
+                this.speciesChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Species 1', 'Species 2', 'Species 3'],
+                        datasets: [{
+                            label: 'Times Observed',
+                            data: [5, 3, 7],
+                            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                            borderColor: 'rgba(75, 192, 192, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }    
+                        }
+                    }
+                });
+            }
+        },
+            mounted() {
+                this.renderChart();
             },
-            // watch: {
-            //     searchQuery() {
-            //         //need to implement search logic for species list here
-            //         this.filteredSpecies = this.speciesList.filter(species => 
-            //             species.name.toLowerCase().includes(this.searchQuery.toLowerCase())
-            //         );
-            //     },
-            // },
-            // mounted() {
-            //     //for testing purpose (replace with API call later)
-            //     this.speciesList = [
-            //         { id: 1, name: 'Sparrow', timesObserved: 5 },
-            //         { id: 2, name: 'Eagle', timesObserved: 2 },
-            //         { id: 3, name: 'Robin', timesObserved: 7 },
-            //     ];
-            //     this.filteredSpecies = this.speciesList;
-            // },
             created() {
                 // Fetch all species initially
                 this.fetchSpecies();
