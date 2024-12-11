@@ -72,3 +72,6 @@ success!
 timestamp: 2024-12-10T16:30:36.338189
 ALTER TABLE "my_checklist" ADD "observation_count" DOUBLE;
 success!
+timestamp: 2024-12-10T16:57:47.344787
+ALTER TABLE "my_checklist" ADD "user_email" CHAR(512);
+success!

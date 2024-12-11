@@ -48,8 +48,8 @@ db.define_table(
     Field('TIME_OBSERVATIONS_STARTED', 'time'),
     Field('OBSERVER_ID', 'string'),
     Field('DURATION_MINUTES', 'double'),
-    Field('OBSERVATION_COUNT', 'double')
-    Field('user_email', default=get_user_email),
+    Field('OBSERVATION_COUNT', 'double'),
+    Field('user_email', default=get_user_email)
 )
 
 ### Data Seeding ###
