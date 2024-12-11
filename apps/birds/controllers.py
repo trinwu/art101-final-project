@@ -56,65 +56,6 @@ def get_species():
     except Exception as e:
         return dict(error=str(e))
 
-def checklist():
-    """
-    Render the edit page for a specific checklist
-    URL: /checklist/<checklist_id>
-    """
-    checklist_id = request.args(0)
-    checklist = db.checklists(checklist_id)
-    
-    if not checklist:
-        session.flash = 'Checklist not found'
-        redirect(URL('my_checklists'))
-    
-    return dict(checklist=checklist)
-
-def update_checklist():
-    """
-    Update a checklist's information
-    URL: /update_checklist/<checklist_id>
-    """
-    checklist_id = request.args(0)
-    checklist = db.checklists(checklist_id)
-    
-    if not checklist:
-        session.flash = 'Checklist not found'
-        redirect(URL('my_checklists'))
-    
-    # Validate and update the checklist
-    try:
-        # Get form data
-        species_name = request.vars.species_name
-        latitude = float(request.vars.latitude)
-        longitude = float(request.vars.longitude)
-        date_observed = request.vars.date_observed
-        time_observation_started = request.vars.time_observation_started
-        duration_observed = int(request.vars.duration_observed)
-        
-        # Update the record
-        checklist.update_record(
-            species_name=species_name,
-            latitude=latitude,
-            longitude=longitude,
-            date_observed=date_observed,
-            time_observation_started=time_observation_started,
-            duration_observed=duration_observed
-        )
-        
-        # Commit the transaction
-        db.commit()
-        
-        # Set a success message
-        session.flash = 'Checklist updated successfully'
-        redirect(URL('my_checklists'))
-    
-    except Exception as e:
-        # Handle potential errors
-        db.rollback()
-        session.flash = f'Error updating checklist: {str(e)}'
-        redirect(URL('checklist', args=checklist_id))
-
 @action('get_checklists', method=["GET"])
 @action.uses(db, auth.user)
 def get_checklists():
@@ -248,16 +189,22 @@ def edit_checklist(checklist_id):
 @action.uses(db, auth.user)
 def search_my_checklist():
     query = request.params.get("q", "").strip().lower()  # Get the search query and strip whitespace
-    species = []
-    if query:  # Only perform search if query is not empty
-        # Filter and remove duplicates by grouping or selecting distinct names
+    if query:  # Perform search if query is not empty
         species = db(
             db.my_checklist.COMMON_NAME.contains(query)
         ).select(
-            db.my_checklist.COMMON_NAME, 
+            db.my_checklist.COMMON_NAME,
+            distinct=True
+        ).as_list()
+    else:  # Fetch all species if query is empty
+        species = db(
+            db.my_checklist
+        ).select(
+            db.my_checklist.COMMON_NAME,
             distinct=True
         ).as_list()
     return dict(species=species)
+
 
 @action("get_species_details", method=["GET"])
 @action.uses(db, auth.user)
