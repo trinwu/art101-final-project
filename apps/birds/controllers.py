@@ -265,10 +265,14 @@ def get_species_details():
         return dict(datesObserved=[], timesObserved=0)
     
     checklists = db(db.my_checklist.COMMON_NAME == common_name).select(
-        db.my_checklist.OBSERVATION_DATE
+        db.my_checklist.OBSERVATION_DATE,
+        db.my_checklist.LATITUDE,
+        db.my_checklist.LONGITUDE
     )
     dates_observed = [str(row.OBSERVATION_DATE) for row in checklists]
+    locations = [(row.LATITUDE, row.LONGITUDE) for row in checklists]
     return dict(
         datesObserved=list(set(dates_observed)),  # Unique dates
-        timesObserved=len(dates_observed)  # Total observations
+        timesObserved=len(dates_observed),  # Total observations
+        locations=locations
     )

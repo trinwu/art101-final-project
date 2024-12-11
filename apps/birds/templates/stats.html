@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>User Statistics</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
     <style>
         [v-cloak] {
             display: none;
@@ -23,6 +24,11 @@
         .date-buttons {
             margin-top: 1.5rem;
             margin-bottom: 1.5rem;
+        }
+        .map-placeholder {
+            width: 100%;
+            height: 300px; 
+            border: 1px solid #ccc;
         }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -95,7 +101,8 @@
             <div class="content">
                 <p><strong>Times Observed:</strong> {{ selectedSpecies.timesObserved }}</p>
                 <p><strong>Locations:</strong></p>
-                <div class="map-placeholder">[Map Placeholder]</div>
+                <!-- <div class="map-placeholder">[Map Placeholder]</div> -->
+                <div class="map-placeholder" id="speciesMap"></div>
             </div>
         </div>
 
@@ -109,6 +116,8 @@
 
     <script src="https://cdn.jsdelivr.net/npm/vue@3"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.js"></script>
     <script>
         const app = Vue.createApp({
             data() {
@@ -142,7 +151,10 @@
                             ...species,
                             datesObserved: response.data.datesObserved || [],
                             timesObserved: response.data.timesObserved || 0,
+                            locations: response.data.locations || []
+                            
                         };
+                        this.renderMap();
                         this.renderChart();
                     } catch (error) {
                         console.error('Error fetching species details:', error);
@@ -188,6 +200,53 @@
                                 }
                             }
                         }
+                    });
+                },
+                renderMap() {
+                    // Ensure selectedSpecies and its locations are properly set
+                    if (!this.selectedSpecies || !this.selectedSpecies.locations || this.selectedSpecies.locations.length === 0) {
+                        console.warn('No locations to render map');
+                        return;
+                    }
+                    
+
+                    // Make sure the map container is available
+                    this.$nextTick(() => {
+                        const mapContainer = document.getElementById('speciesMap');
+                        if (!mapContainer) {
+                            console.error('Map container not found');
+                            return;
+                        }
+
+                        if (this.map) {
+                            this.map.remove(); // Remove the old map
+                        }
+
+                        this.map = L.map('speciesMap').setView([36.9741, -122.0308], 9);  // Set initial coordinates and zoom level
+
+                        // Tile layer for the map
+                        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                        }).addTo(this.map);
+
+                        // Add markers for each location of the species
+                        this.selectedSpecies.locations.forEach(location => {
+                            // L.marker([location.latitude, location.longitude]).addTo(map)
+                            //     .bindPopup(`<b>${this.selectedSpecies.COMMON_NAME}</b><br>Location: ${location.name}`);
+                            if (Array.isArray(location) && location.length === 2) {
+                                const [latitude, longitude] = location; // Destructure the array into latitude and longitude
+
+                                if (latitude && longitude) {
+                                    // Create the marker with valid latitude and longitude
+                                    L.marker([latitude, longitude]).addTo(this.map)
+                                        .bindPopup(`<b>${this.selectedSpecies.COMMON_NAME}</b><br>Location: ${location.name || 'Unnamed'}`);
+                                } else {
+                                    console.warn(`Invalid coordinates in array for ${this.selectedSpecies.COMMON_NAME}:`, location);
+                                }
+                            } else {
+                                console.warn(`Invalid location format for ${this.selectedSpecies.COMMON_NAME}:`, location);
+                            }
+                        });
                     });
                 }
             },
