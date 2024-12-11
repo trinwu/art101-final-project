@@ -48,6 +48,7 @@
                             class="input is-small"
                             v-model.number="species.count"
                             min="0"
+                            @input="updateObservationCount"
                         />
                     </td>
                     <td>
@@ -68,6 +69,13 @@
                     <input class="input" type="text" v-model="speciesName" placeholder="Enter species name">
                 </div>
                 <p v-if="errors.speciesName" class="help is-danger">{{ errors.speciesName }}</p>
+            </div>
+
+            <div class="field">
+                <label class="label">Number Seen</label>
+                <div class="control">
+                    <input class="input" type="number" v-model="observationCount" readonly>
+                </div>
             </div>
 
             <div class="field">
@@ -127,7 +135,7 @@
                     <button type="submit" class="button is-link" :disabled="hasErrors">Submit Checklist</button>
                 </div>
                 <div class="control">
-                    <button type="button" class="button is-light" @click="resetForm">Cancel</button>
+                    <a href="/birds/index" class="button is-light">Cancel</a>
                 </div>
             </div>
         </form>
@@ -147,6 +155,7 @@
                     observationDate: '',
                     timeObservationsStarted: '',
                     durationMinutes: '',
+                    observationCount: 0, 
                     errors: {}, // Object to hold field-specific errors
                     speciesName: '', 
                 };
@@ -182,6 +191,13 @@
                 incrementCount(species) {
                     if (!species.count) species.count = 0;
                     species.count++;
+                    this.speciesName = species.COMMON_NAME; // Automatically set the species name
+                    this.updateObservationCount();
+                },
+                updateObservationCount() {
+                    this.observationCount = this.filteredSpecies.reduce((total, species) => {
+                        return total + (species.count || 0);
+                    }, 0);
                 },
                 resetForm() {
                     this.latitude = '';
@@ -191,6 +207,7 @@
                     this.durationMinutes = '';
                     this.speciesName = '';
                     this.filteredSpecies = [];
+                    this.observationCount = 0;
                     this.errors = {};
                 },
                 validateAndSubmit() {
@@ -206,6 +223,7 @@
                         observationDate: this.observationDate,
                         timeObservationsStarted: this.timeObservationsStarted,
                         durationMinutes: this.durationMinutes,
+                        observationCount: this.observationCount, 
                         species: this.filteredSpecies.filter(s => s.count > 0),
                     };
 
@@ -230,3 +248,4 @@
     </script>
 </body>
 </html>
+

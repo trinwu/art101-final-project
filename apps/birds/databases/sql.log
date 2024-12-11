@@ -69,3 +69,6 @@ success!
 timestamp: 2024-12-09T14:50:32.288143
 ALTER TABLE "my_checklist" ADD "common_name" CHAR(512);
 success!
+timestamp: 2024-12-10T16:30:36.338189
+ALTER TABLE "my_checklist" ADD "observation_count" DOUBLE;
+success!

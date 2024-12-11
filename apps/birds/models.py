@@ -47,7 +47,8 @@ db.define_table(
     Field('OBSERVATION_DATE', 'date'),
     Field('TIME_OBSERVATIONS_STARTED', 'time'),
     Field('OBSERVER_ID', 'string'),
-    Field('DURATION_MINUTES', 'double')
+    Field('DURATION_MINUTES', 'double'),
+    Field('OBSERVATION_COUNT', 'double')
 )
 
 ### Data Seeding ###

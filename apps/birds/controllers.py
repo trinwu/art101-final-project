@@ -171,6 +171,7 @@ def submit_checklist():
             "OBSERVATION_DATE": data.get("observationDate"),
             "TIME_OBSERVATIONS_STARTED": data.get("timeObservationsStarted"),
             "DURATION_MINUTES": float(data.get("durationMinutes")),
+            "OBSERVATION_COUNT": float(data.get("observationCount")),
         }
         checklist_id = db.my_checklist.insert(**checklist_data)
 
@@ -230,6 +231,7 @@ def edit_checklist(checklist_id):
             "OBSERVATION_DATE": data.get("OBSERVATION_DATE"),
             "TIME_OBSERVATIONS_STARTED": data.get("TIME_OBSERVATIONS_STARTED"),
             "DURATION_MINUTES": float(data.get("DURATION_MINUTES")),
+            "OBSERVATION_COUNT": float(data.get("OBSERVATION_COUNT")),
         }
 
         # Update the checklist in the database
