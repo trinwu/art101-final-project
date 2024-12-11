@@ -80,7 +80,7 @@
 
         <!-- Species Details Visualization -->
         <div v-if="selectedSpecies" class="box spaced-line">
-            <h2 class="subtitle">Details for {{ selectedSpecies.COMMON_NAME }}</h2>
+            <h2 class="subtitle"><strong>Details for {{ selectedSpecies.COMMON_NAME }}</strong></h2>
 
             <!-- Dates Observed as Buttons -->
             <div class="date-buttons">
@@ -101,15 +101,15 @@
             <div class="content">
                 <p><strong>Times Observed:</strong> {{ selectedSpecies.timesObserved }}</p>
                 <p><strong>Locations:</strong></p>
-                <!-- <div class="map-placeholder">[Map Placeholder]</div> -->
                 <div class="map-placeholder" id="speciesMap"></div>
             </div>
         </div>
 
         <!-- Trend Visualization -->
         <div class="box">
-            <h2 class="subtitle">Bird-Watching Trends</h2>
-            <!-- <div class="chart-placeholder">[Chart Placeholder]</div> -->
+            <h2 class="subtitle">
+                <strong>{{ selectedSpecies ? `${selectedSpecies.COMMON_NAME} Trends` : 'Bird-Watching Trends' }}</strong>
+            </h2>
             <canvas id="speciesChart" width="400" height="200"></canvas>
         </div>
     </div>
@@ -117,15 +117,15 @@
     <script src="https://cdn.jsdelivr.net/npm/vue@3"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
-    <script src="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.js"></script>
     <script>
         const app = Vue.createApp({
             data() {
                 return {
                     searchQuery: '',
-                    speciesList: [], 
+                    speciesList: [],
                     filteredSpecies: [],
-                    selectedSpecies: null, 
+                    selectedSpecies: null,
+                    selectedDate: null,
                     speciesChart: null,
                 };
             },
@@ -143,74 +143,68 @@
                 },
                 async viewSpeciesDetails(species) {
                     try {
-                        // Fetch observation details for the selected species
                         const response = await axios.get('/birds/get_species_details', {
                             params: { common_name: species.COMMON_NAME },
                         });
+
+                        const details = response.data;
+
                         this.selectedSpecies = {
                             ...species,
-                            datesObserved: response.data.datesObserved || [],
-                            timesObserved: response.data.timesObserved || 0,
-                            locations: response.data.locations || []
-                            
+                            datesObserved: details.datesObserved,
+                            timesObserved: details.timesObserved,
+                            locations: details.locations,
+                            counts: details.counts,
                         };
+
                         this.renderMap();
                         this.renderChart();
                     } catch (error) {
                         console.error('Error fetching species details:', error);
                     }
                 },
-                onDateClick(date) {
-                    alert(`You clicked on the date: ${date}`);
-                    // Add additional logic for date click handling
-                },
                 renderChart() {
-                    if (!this.selectedSpecies || !this.selectedSpecies.datesObserved || this.selectedSpecies.datesObserved.length === 0) {
+                    if (!this.selectedSpecies || !this.selectedSpecies.datesObserved) {
                         console.warn('No dates observed to render chart');
-                        return; // Exit if there's no data to display
+                        return;
                     }
 
                     const dates = this.selectedSpecies.datesObserved;
-                    const timesObserved = dates.map(date => this.selectedSpecies.timesObserved); // Assuming `timesObserved` is same for each date
+                    const counts = dates.map(date => this.selectedSpecies.counts[date]);
 
                     if (this.speciesChart) {
-                        this.speciesChart.destroy(); // Destroy previous chart if it exists
+                        this.speciesChart.destroy();
                     }
 
                     const ctx = document.getElementById('speciesChart');
-                    if (!ctx) return; // Exit if canvas is not found
+                    if (!ctx) return;
 
                     this.speciesChart = new Chart(ctx, {
                         type: 'bar',
                         data: {
-                            labels: dates,  // Use the actual dates observed
+                            labels: dates,
                             datasets: [{
-                                label: 'Times Observed',
-                                data: timesObserved,  // Times observed for each date
+                                label: 'Observation Counts',
+                                data: counts,
                                 backgroundColor: 'rgba(75, 192, 192, 0.2)',
                                 borderColor: 'rgba(75, 192, 192, 1)',
-                                borderWidth: 1
-                            }]
+                                borderWidth: 1,
+                            }],
                         },
                         options: {
                             responsive: true,
                             scales: {
-                                y: {
-                                    beginAtZero: true
-                                }
-                            }
-                        }
+                                y: { beginAtZero: true },
+                            },
+                        },
                     });
                 },
                 renderMap() {
-                    // Ensure selectedSpecies and its locations are properly set
-                    if (!this.selectedSpecies || !this.selectedSpecies.locations || this.selectedSpecies.locations.length === 0) {
+                    if (!this.selectedSpecies || !this.selectedSpecies.locations) {
                         console.warn('No locations to render map');
                         return;
                     }
-                    
 
-                    // Make sure the map container is available
                     this.$nextTick(() => {
                         const mapContainer = document.getElementById('speciesMap');
                         if (!mapContainer) {
@@ -219,42 +213,28 @@
                         }
 
                         if (this.map) {
-                            this.map.remove(); // Remove the old map
+                            this.map.remove();
                         }
 
-                        this.map = L.map('speciesMap').setView([36.9741, -122.0308], 9);  // Set initial coordinates and zoom level
+                        this.map = L.map('speciesMap').setView([36.9741, -122.0308], 9);
 
-                        // Tile layer for the map
                         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                            attribution: '&copy; OpenStreetMap contributors',
                         }).addTo(this.map);
 
-                        // Add markers for each location of the species
-                        this.selectedSpecies.locations.forEach(location => {
-                            // L.marker([location.latitude, location.longitude]).addTo(map)
-                            //     .bindPopup(`<b>${this.selectedSpecies.COMMON_NAME}</b><br>Location: ${location.name}`);
-                            if (Array.isArray(location) && location.length === 2) {
-                                const [latitude, longitude] = location; // Destructure the array into latitude and longitude
-
-                                if (latitude && longitude) {
-                                    // Create the marker with valid latitude and longitude
-                                    L.marker([latitude, longitude]).addTo(this.map)
-                                        .bindPopup(`<b>${this.selectedSpecies.COMMON_NAME}</b><br>Location: ${location.name || 'Unnamed'}`);
-                                } else {
-                                    console.warn(`Invalid coordinates in array for ${this.selectedSpecies.COMMON_NAME}:`, location);
-                                }
-                            } else {
-                                console.warn(`Invalid location format for ${this.selectedSpecies.COMMON_NAME}:`, location);
+                        this.selectedSpecies.locations.forEach(([lat, lon]) => {
+                            if (lat && lon) {
+                                L.marker([lat, lon]).addTo(this.map)
+                                    .bindPopup(`<b>${this.selectedSpecies.COMMON_NAME}</b>`);
                             }
                         });
                     });
-                }
+                },
             },
             mounted() {
                 this.renderChart();
             },
             created() {
-                // Fetch all species initially
                 this.fetchSpecies();
             },
         });

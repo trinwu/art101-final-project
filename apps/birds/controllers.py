@@ -211,17 +211,27 @@ def search_my_checklist():
 def get_species_details():
     common_name = request.params.get("common_name", "").strip()
     if not common_name:
-        return dict(datesObserved=[], timesObserved=0)
-    
+        return dict(datesObserved=[], timesObserved=0, counts={}, locations=[])
+
+    # Query the database for matching rows
     checklists = db(db.my_checklist.COMMON_NAME == common_name).select(
         db.my_checklist.OBSERVATION_DATE,
         db.my_checklist.LATITUDE,
-        db.my_checklist.LONGITUDE
+        db.my_checklist.LONGITUDE,
+        db.my_checklist.OBSERVATION_COUNT
     )
-    dates_observed = [str(row.OBSERVATION_DATE) for row in checklists]
-    locations = [(row.LATITUDE, row.LONGITUDE) for row in checklists]
+
+    # Aggregate counts by date
+    dates_count = {}
+    locations = []
+    for row in checklists:
+        date = str(row.OBSERVATION_DATE)
+        dates_count[date] = dates_count.get(date, 0) + (row.OBSERVATION_COUNT or 0)
+        locations.append((row.LATITUDE, row.LONGITUDE))
+
     return dict(
-        datesObserved=list(set(dates_observed)),  # Unique dates
-        timesObserved=len(dates_observed),  # Total observations
-        locations=locations
+        datesObserved=list(dates_count.keys()),
+        timesObserved=sum(dates_count.values()),
+        locations=locations,
+        counts=dates_count  
     )
