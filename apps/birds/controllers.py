@@ -77,11 +77,15 @@ def get_my_checklists():
 @action('add_checklist')
 @action.uses('add_checklist.html', db, auth.user)
 def add_checklist():
+    if not auth.current_user:
+        redirect(URL('auth/login'))
     return dict()
 
 @action('my_checklists')
 @action.uses('my_checklists.html', db, auth.user)
 def my_checklists():
+    if not auth.current_user:
+        redirect(URL('auth/login'))
     return dict()
 
 @action('stats')
