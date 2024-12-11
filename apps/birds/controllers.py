@@ -37,14 +37,12 @@ url_signer = URLSigner(session)
 @action.uses('index.html', db, auth, url_signer)
 def index():
     return dict(
-        # COMPLETE: return here any signed URLs you need.
         my_callback_url = URL('my_callback', signer=url_signer),
     )
 
 @action('my_callback')
-@action.uses() # Add here things like db, auth, etc.
+@action.uses()
 def my_callback():
-    # The return value should be a dictionary that will be sent as JSON.
     return dict(my_value=3)
 
 @action("get_species", method=["GET"])
@@ -60,50 +58,51 @@ def get_species():
 @action.uses(db, auth.user)
 def get_checklists():
     try:
-        checklists = db(db.checklist).select().as_list()
+        user_email = get_user_email()
+        checklists = db(db.my_checklist.user_email == user_email).select().as_list()
         return dict(checklists=checklists)
     except Exception as e:
         return dict(error=str(e))
 
 @action('get_my_checklists', method=["GET"])
 @action.uses(db, auth.user)
-def get_checklists():
+def get_my_checklists():
     try:
-        checklists = db(db.my_checklist).select().as_list()
+        user_email = get_user_email()
+        checklists = db(db.my_checklist.user_email == user_email).select().as_list()
         return dict(checklists=checklists)
     except Exception as e:
         return dict(error=str(e))
 
-
 @action('add_checklist')
-@action.uses('add_checklist.html', db, auth)
+@action.uses('add_checklist.html', db, auth.user)
 def add_checklist():
     return dict()
 
 @action('my_checklists')
-@action.uses('my_checklists.html', db, auth)
+@action.uses('my_checklists.html', db, auth.user)
 def my_checklists():
     return dict()
 
 @action('stats')
-@action.uses('stats.html', db, auth)
+@action.uses('stats.html', db, auth.user)
 def stats():
     return dict()
 
 @action("search_species", method=["GET"])
 @action.uses(db)
 def search_species():
-    query = request.params.get("q", "").strip().lower()  # Get the search query and strip whitespace
+    query = request.params.get("q", "").strip().lower()
     species = []
-    if query:  # Only perform search if query is not empty
-        # Filter species by name containing the query
+    if query:
         species = db(db.species.COMMON_NAME.contains(query)).select().as_list()
     return dict(species=species)
 
 @action("submit_checklist", method=["POST"])
-@action.uses(db)
+@action.uses(db, auth.user)
 def submit_checklist():
     try:
+        user_email = get_user_email()
         data = request.json
         checklist_data = {
             "COMMON_NAME": str(data.get("speciesName")),
@@ -113,10 +112,9 @@ def submit_checklist():
             "TIME_OBSERVATIONS_STARTED": data.get("timeObservationsStarted"),
             "DURATION_MINUTES": float(data.get("durationMinutes")),
             "OBSERVATION_COUNT": float(data.get("observationCount")),
+            "user_email": user_email,
         }
         checklist_id = db.my_checklist.insert(**checklist_data)
-
-        # Handle species data
         species = data.get("species", [])
         for s in species:
             db.sightings.insert(
@@ -133,37 +131,26 @@ def submit_checklist():
 @action('delete_checklist/<checklist_id>', method=["DELETE"])
 @action.uses(db, auth.user)
 def delete_checklist(checklist_id):
-    """
-    Deletes a checklist from the `my_checklist` table.
-    """
     try:
-        # Verify the checklist exists
-        checklist = db.my_checklist(checklist_id)
+        user_email = get_user_email()
+        checklist = db((db.my_checklist.id == checklist_id) & (db.my_checklist.user_email == user_email)).select().first()
         if not checklist:
             return dict(status="error", message="Checklist not found")
-
-        # Delete the checklist
         db(db.my_checklist.id == checklist_id).delete()
         db.commit()
-
         return dict(status="success", message="Checklist deleted successfully")
     except Exception as e:
         db.rollback()
         return dict(status="error", message=f"Error deleting checklist: {str(e)}")
- 
+
 @action('edit_checklist/<checklist_id>', method=["POST"])
 @action.uses(db, auth.user)
 def edit_checklist(checklist_id):
-    """
-    Update a checklist entry in the `my_checklist` table.
-    """
     try:
-        # Fetch the checklist by ID
-        checklist = db.my_checklist(checklist_id)
+        user_email = get_user_email()
+        checklist = db((db.my_checklist.id == checklist_id) & (db.my_checklist.user_email == user_email)).select().first()
         if not checklist:
             return dict(status="error", message="Checklist not found")
-
-        # Get data from the POST request
         data = request.json
         checklist_data = {
             "COMMON_NAME": data.get("COMMON_NAME"),
@@ -174,64 +161,60 @@ def edit_checklist(checklist_id):
             "DURATION_MINUTES": float(data.get("DURATION_MINUTES")),
             "OBSERVATION_COUNT": float(data.get("OBSERVATION_COUNT")),
         }
-
-        # Update the checklist in the database
         db(db.my_checklist.id == checklist_id).update(**checklist_data)
         db.commit()
-
         return dict(status="success", message="Checklist updated successfully")
     except Exception as e:
         db.rollback()
         return dict(status="error", message=f"Error updating checklist: {str(e)}")
 
-
 @action("search_my_checklist", method=["GET"])
 @action.uses(db, auth.user)
 def search_my_checklist():
-    query = request.params.get("q", "").strip().lower()  # Get the search query and strip whitespace
-    if query:  # Perform search if query is not empty
+    user_email = get_user_email()
+    query = request.params.get("q", "").strip().lower()
+    if query:
         species = db(
+            (db.my_checklist.user_email == user_email) &
             db.my_checklist.COMMON_NAME.contains(query)
         ).select(
             db.my_checklist.COMMON_NAME,
             distinct=True
         ).as_list()
-    else:  # Fetch all species if query is empty
+    else:
         species = db(
-            db.my_checklist
+            db.my_checklist.user_email == user_email
         ).select(
             db.my_checklist.COMMON_NAME,
             distinct=True
         ).as_list()
     return dict(species=species)
 
-
 @action("get_species_details", method=["GET"])
 @action.uses(db, auth.user)
 def get_species_details():
+    user_email = get_user_email()
     common_name = request.params.get("common_name", "").strip()
     if not common_name:
         return dict(datesObserved=[], timesObserved=0, counts={}, locations=[])
-
-    # Query the database for matching rows
-    checklists = db(db.my_checklist.COMMON_NAME == common_name).select(
+    checklists = db(
+        (db.my_checklist.COMMON_NAME == common_name) &
+        (db.my_checklist.user_email == user_email)
+    ).select(
         db.my_checklist.OBSERVATION_DATE,
         db.my_checklist.LATITUDE,
         db.my_checklist.LONGITUDE,
         db.my_checklist.OBSERVATION_COUNT
     )
-
-    # Aggregate counts by date
     dates_count = {}
     locations = []
     for row in checklists:
         date = str(row.OBSERVATION_DATE)
         dates_count[date] = dates_count.get(date, 0) + (row.OBSERVATION_COUNT or 0)
         locations.append((row.LATITUDE, row.LONGITUDE))
-
     return dict(
         datesObserved=list(dates_count.keys()),
         timesObserved=sum(dates_count.values()),
         locations=locations,
-        counts=dates_count  
+        counts=dates_count
     )
