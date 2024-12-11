@@ -49,6 +49,7 @@ db.define_table(
     Field('OBSERVER_ID', 'string'),
     Field('DURATION_MINUTES', 'double'),
     Field('OBSERVATION_COUNT', 'double')
+    Field('user_email', default=get_user_email),
 )
 
 ### Data Seeding ###
