@@ -102,7 +102,7 @@ function popupMessage(name, recipe, ingredients = []) {
     const popupSound = document.getElementById("popup-sound");
 
 
-    const ingredientsHTML = `<div class="ingredients"><h3>Ingredients:</h3><ul>${ingredients.map((ing) => `<li>${ing}</li>`).join('')}</ul></div>`;
+    const ingredientsHTML = `<div class="ingredients"><h3>Ingredients:</h3>${ingredients.map((ing) => `<span class="ingredientsSpan">${ing}</span>`).join('')}</div>`;
     const instructionsHTML = `<div class="instructions"><h3>Instructions:</h3><p>${recipe}</p></div>`;
 
     popupSound.play();

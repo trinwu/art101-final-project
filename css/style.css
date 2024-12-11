@@ -37,6 +37,7 @@ header {
     background-color: var(--color-background);
     padding: 10px 0;
     width: 1000px;
+    padding-top: 50px;
 }
 
 header h1 {
@@ -191,7 +192,7 @@ footer p {
 
 .popup h2 {
     font-size: 40px;
-    padding: 0 30px;
+    padding: 15px;
     color: var(--color-button);
     margin-bottom: 30px;
     font-family: monospace;
@@ -212,6 +213,7 @@ footer p {
     font-size: 30px;
     color: var(--color-button-hover);
     margin-bottom: 5px;
+    /*padding: 30px 0;*/
 }
 
 .popup ul {
@@ -241,6 +243,7 @@ hr {
 footer {
     text-align: center;
     font-family: monospace;
+    margin-top: 20px;
 }
 
 .container {
@@ -250,3 +253,18 @@ footer {
     gap: 20px;
 }
 
+.ingredientsSpan {
+    /*color: red;*/
+    background-color: white;
+    margin: 5px 10px 5px 0;
+    border-radius: 5px;
+    padding: 10px;
+    display: inline-block;
+}
+
+.buttonoverlaycontainer {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    padding-bottom: 20px;
+}
